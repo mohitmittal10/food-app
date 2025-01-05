@@ -1,0 +1,33 @@
+.header {
+  position: relative; /* Ensures elements inside can be absolutely positioned */
+  background-color: #02893f;
+  color: white;
+  padding: 90px;
+}
+
+.header-title {
+  text-align: center; /* Keeps the title in the center */
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.nav-links {
+  position: absolute; /* Positions the nav-links relative to the header */
+  top: 10px; /* Aligns the nav-links to the top */
+  right: 50px;
+  
+   /* Positions nav-links towards the right with some padding */
+}
+
+.nav-links a {
+  margin-left: 23px; /* Adds space between each link */
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-family: serif;
+  
+}
+
+.nav-links a:hover {
+  text-decoration: underline; /* Add hover effect */
+}

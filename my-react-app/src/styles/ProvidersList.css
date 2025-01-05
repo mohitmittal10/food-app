@@ -1,0 +1,107 @@
+.app {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  padding: 10px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: darkorange;
+}
+
+.providers-list {
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.providers-list h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.provider-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.provider-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.provider-header p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.rating {
+  font-weight: bold;
+  color: #ff9800;
+}
+
+.provider-body {
+  margin-top: 15px;
+}
+
+.provider-body strong {
+  color: #333;
+}
+
+.order-section {
+  margin-top: 10px;
+}
+
+.order-section select {
+  padding: 5px;
+  margin-left: 10px;
+}
+
+.provider-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  align-items: center;
+}
+
+.provider-footer p {
+  margin: 0;
+  color: #333;
+}
+
+.order-btn {
+  padding: 10px 15px;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.order-btn:hover {
+  background-color: darkgreen;
+}
