@@ -1,18 +1,19 @@
 import React from "react";
-import "./styles/App.css";
-import Header from "./components/Header";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/signup/Login";
+import Register from "./components/signup/Register";
+import Home from "./home";
 
-// import TrackingProgress from "./components/TrackingProgress";
-import ProvidersList from "./components/ProvidersList";
-
-const App = () => {
+function App() {
   return (
-    <div className="app">
-      <Header />
-      {/* <TrackingProgress /> */}
-      <ProvidersList />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
