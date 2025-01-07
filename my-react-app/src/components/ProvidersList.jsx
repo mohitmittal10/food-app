@@ -320,6 +320,8 @@
 // export default App;
 
 import React, { useState, useEffect } from "react";
+import Header from "./Header";
+
 import "../styles/ProvidersList.css";
 
 const ProvidersList = () => {
@@ -379,6 +381,7 @@ const ProvidersList = () => {
 
   return (
     <div className="providers-page">
+      <Header/>
       {/* Search Bar */}
       <header className="search-bar">
         <input

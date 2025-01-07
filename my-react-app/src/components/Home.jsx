@@ -1,9 +1,11 @@
 import React from "react";
 import "../styles/Home.css";
-
-const Home = () => {
+import Footer from "./Footer";
+import Header from "./Header";
+const Home2 = () => {
   return (
     <div className="home-page">
+      <Header/>
       <header className="home-header">
         {/* <h1>स्वाद अनुसार</h1>
         <p>Your Taste, Our Service</p>
@@ -47,8 +49,9 @@ const Home = () => {
           Get Started
         </button>
       </footer>
+      <Footer/>
     </div>
   );
 };
 
-export default Home;
+export default Home2;
