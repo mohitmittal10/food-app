@@ -198,10 +198,131 @@
 
 
 
-import React, { useState } from "react";
+// import React, { useState } from "react";
+// import "../styles/ProvidersList.css";
+
+// const App = () => {
+//   const [location, setLocation] = useState("");
+//   const [filteredProviders, setFilteredProviders] = useState([]);
+
+//   const providers = [
+//     {
+//       id: 1,
+//       name: "Maa's Kitchen",
+//       cuisine: "North Indian | Pure Veg",
+//       location: "Jaipur",
+//       rating: 4.5,
+//       reviews: 120,
+//       menu: "2 Rotis, Dal Fry, Mix Veg, Rice, Salad",
+//       price: 80,
+//       minDays: 7,
+//     },
+//     {
+//       id: 2,
+//       name: "Gujarati Rasoi",
+//       cuisine: "Gujarati | Pure Veg",
+//       location: "Ahmedabad",
+//       rating: 4.0,
+//       reviews: 85,
+//       menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
+//       price: 90,
+//       minDays: 5,
+//     },
+//     {
+//       id: 3,
+//       name: "Rajasthani Rasoi",
+//       cuisine: "Rajasthani | Pure Veg",
+//       location: "Jaipur",
+//       rating: 4.3,
+//       reviews: 100,
+//       menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
+//       price: 85,
+//       minDays: 6,
+//     },
+//   ];
+
+//   // Filter providers based on location input
+//   const handleSearch = () => {
+//     if (location.trim() === "") {
+//       setFilteredProviders(providers);
+//     } else {
+//       const filtered = providers.filter((provider) =>
+//         provider.location.toLowerCase().includes(location.toLowerCase())
+//       );
+//       setFilteredProviders(filtered);
+//     }
+//   };
+
+//   React.useEffect(() => {
+//     // Initially display all providers
+//     setFilteredProviders(providers);
+//   }, []);
+
+//   return (
+//     <div className="app">
+//       <header className="search-bar">
+//         <input
+//           type="text"
+//           placeholder="Enter your location"
+//           value={location}
+//           onChange={(e) => setLocation(e.target.value)}
+//         />
+//         <button onClick={handleSearch}>Search</button>
+//       </header>
+
+//       <main className="providers-list">
+//         <h2>Today's Available Providers</h2>
+
+//         {filteredProviders.length > 0 ? (
+//           filteredProviders.map((provider) => (
+//             <div key={provider.id} className="provider-card">
+//               <div className="provider-header">
+//                 <h3>{provider.name}</h3>
+//                 <p>{provider.cuisine}</p>
+//                 <p>{provider.location}</p>
+//                 <p>
+//                   <span className="rating">⭐ {provider.rating}</span> (
+//                   {provider.reviews} reviews)
+//                 </p>
+//               </div>
+//               <div className="provider-body">
+//                 <p>
+//                   <strong>Today's Menu:</strong> {provider.menu}
+//                 </p>
+//                 <div className="order-section">
+//                   <label htmlFor={`tiffin-quantity-${provider.id}`}>
+//                     Number of Tiffins:
+//                   </label>
+//                   <select id={`tiffin-quantity-${provider.id}`}>
+//                     {[1, 2, 3, 4, 5].map((num) => (
+//                       <option key={num} value={num}>
+//                         {num}
+//                       </option>
+//                     ))}
+//                   </select>
+//                 </div>
+//               </div>
+//               <div className="provider-footer">
+//                 <p>₹{provider.price}/meal</p>
+//                 <p>Min order: {provider.minDays} days</p>
+//                 <button className="order-btn">Order Now</button>
+//               </div>
+//             </div>
+//           ))
+//         ) : (
+//           <p>No tiffin providers available for the entered location.</p>
+//         )}
+//       </main>
+//     </div>
+//   );
+// };
+
+// export default App;
+
+import React, { useState, useEffect } from "react";
 import "../styles/ProvidersList.css";
 
-const App = () => {
+const ProvidersList = () => {
   const [location, setLocation] = useState("");
   const [filteredProviders, setFilteredProviders] = useState([]);
 
@@ -243,23 +364,22 @@ const App = () => {
 
   // Filter providers based on location input
   const handleSearch = () => {
-    if (location.trim() === "") {
-      setFilteredProviders(providers);
-    } else {
-      const filtered = providers.filter((provider) =>
-        provider.location.toLowerCase().includes(location.toLowerCase())
-      );
-      setFilteredProviders(filtered);
-    }
+    const filtered = location.trim()
+      ? providers.filter((provider) =>
+          provider.location.toLowerCase().includes(location.toLowerCase())
+        )
+      : providers;
+    setFilteredProviders(filtered);
   };
 
-  React.useEffect(() => {
-    // Initially display all providers
-    setFilteredProviders(providers);
-  }, []);
+  // Trigger filtering when location changes
+  useEffect(() => {
+    handleSearch();
+  }, [location]);
 
   return (
-    <div className="app">
+    <div className="providers-page">
+      {/* Search Bar */}
       <header className="search-bar">
         <input
           type="text"
@@ -270,51 +390,61 @@ const App = () => {
         <button onClick={handleSearch}>Search</button>
       </header>
 
+      {/* Providers List */}
       <main className="providers-list">
         <h2>Today's Available Providers</h2>
 
         {filteredProviders.length > 0 ? (
-          filteredProviders.map((provider) => (
-            <div key={provider.id} className="provider-card">
-              <div className="provider-header">
-                <h3>{provider.name}</h3>
-                <p>{provider.cuisine}</p>
-                <p>{provider.location}</p>
-                <p>
-                  <span className="rating">⭐ {provider.rating}</span> (
-                  {provider.reviews} reviews)
-                </p>
-              </div>
-              <div className="provider-body">
-                <p>
-                  <strong>Today's Menu:</strong> {provider.menu}
-                </p>
-                <div className="order-section">
-                  <label htmlFor={`tiffin-quantity-${provider.id}`}>
-                    Number of Tiffins:
-                  </label>
-                  <select id={`tiffin-quantity-${provider.id}`}>
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
+          <div className="providers-container">
+            {filteredProviders.map((provider) => (
+              <div key={provider.id} className="provider-card">
+                {/* Provider Header */}
+                <div className="provider-header">
+                  <h3>{provider.name}</h3>
+                  <p>{provider.cuisine}</p>
+                  <p>{provider.location}</p>
+                  <p>
+                    <span className="rating">⭐ {provider.rating}</span> (
+                    {provider.reviews} reviews)
+                  </p>
+                </div>
+
+                {/* Provider Body */}
+                <div className="provider-body">
+                  <p>
+                    <strong>Today's Menu:</strong> {provider.menu}
+                  </p>
+                  <div className="order-section">
+                    <label htmlFor={`tiffin-quantity-${provider.id}`}>
+                      Number of Tiffins:
+                    </label>
+                    <select id={`tiffin-quantity-${provider.id}`}>
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <option key={num} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Provider Footer */}
+                <div className="provider-footer">
+                  <p>₹{provider.price}/meal</p>
+                  <p>Min order: {provider.minDays} days</p>
+                  <button className="order-btn">Order Now</button>
                 </div>
               </div>
-              <div className="provider-footer">
-                <p>₹{provider.price}/meal</p>
-                <p>Min order: {provider.minDays} days</p>
-                <button className="order-btn">Order Now</button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
-          <p>No tiffin providers available for the entered location.</p>
+          <p className="no-providers">
+            No tiffin providers available for the entered location.
+          </p>
         )}
       </main>
     </div>
   );
 };
 
-export default App;
+export default ProvidersList;

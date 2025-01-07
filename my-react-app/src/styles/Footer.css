@@ -1,0 +1,76 @@
+.footer {
+  background-color: rgb(240, 240, 245); /* Dark Green */
+  padding: 20px 40px;
+  font-family: serif;
+  color: #FFFFFF; /* White text */
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.footer-logo {
+  flex: 1;
+  margin-right: 20px;
+  color: black;
+}
+
+.footer-logo img {
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.footer-column {
+  flex: 1;
+  margin: 10px 20px;
+}
+
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: black; /* White text */
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  font-size: 14px;
+  color: black; /* White text for links */
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.footer-column ul li:hover {
+  text-decoration: underline;
+}
+
+.footer-column ul li a {
+  color: #80ED99; /* Mint Green for links */
+  text-decoration: none;
+}
+
+.footer-column ul li a:hover {
+  color: #A8DADC; /* Soft Aqua on hover */
+}
+
+.footer-dropdown {
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.social-links i {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #FFFFFF; /* White color for icons */
+  cursor: pointer;
+}
+
+.social-links i:hover {
+  color: #ff6600; /* Hover effect for icons */
+}
