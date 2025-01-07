@@ -1,27 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
-import Footer from "./Footer";
-import Header from "./Header";
+
 const Home2 = () => {
-  const navigate = useNavigate(); // Use React Router's navigation
+  const navigate = useNavigate();
 
   return (
     <div className="home-page">
-      <Header/>
-      {/* Header Section */}
       <header className="home-header">
-        {/* <h1>स्वाद अनुसार - Your Taste, Our Service</h1>
-        <p>Fresh homemade tiffin delivered to your doorstep.</p> */}
-        <button
-          onClick={() => navigate("/providers")}
-          className="explore-btn"
-        >
+        <button onClick={() => navigate("/providers")} className="explore-btn">
           Explore Providers
         </button>
       </header>
-
-      {/* Features Section */}
       <main className="home-features">
         <h2>Why Choose Us?</h2>
         <div className="features-container">
@@ -43,18 +33,12 @@ const Home2 = () => {
           </div>
         </div>
       </main>
-
-      {/* Footer Section */}
       <footer className="home-footer">
         <p>Join thousands of satisfied customers today!</p>
-        <button
-          onClick={() => navigate("/login")}
-          className="signup-btn"
-        >
+        <button onClick={() => navigate("/login")} className="signup-btn">
           Get Started
         </button>
       </footer>
-      <Footer/>
     </div>
   );
 };

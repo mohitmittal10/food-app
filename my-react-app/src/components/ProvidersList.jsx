@@ -429,7 +429,7 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
 
   return (
     <div className="providers-page">
-      <Header/>
+      
       {/* Search Bar */}
       <header className="search-bar">
         <input
