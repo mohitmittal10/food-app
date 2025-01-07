@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/Header.css";
 
-const Header = () => {
+const Header = ({ orderCount }) => {
   return (
     <header className="header">
       {/* Title Section */}
@@ -13,11 +13,12 @@ const Header = () => {
 
       {/* Navigation Links */}
       <nav className="nav-links">
-        <a href="/home">Home</a>
-        <a href="/providers">Providers</a>
-        <a href="/track">Track Order</a>
-        <a href="/orders">My Orders</a>
-        <a href="/login">Login</a>
+        <Link to="/">Home</Link>
+        <Link to="/providers">Providers</Link>
+        <Link to="/track">Track Order</Link>
+        {/* Display the order count in My Orders link */}
+        <Link to="/orders">My Orders ({orderCount || 0})</Link>
+        <Link to="/login">Login</Link>
       </nav>
     </header>
   );
