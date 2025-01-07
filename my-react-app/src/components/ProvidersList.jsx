@@ -318,13 +318,16 @@
 // };
 
 // export default App;
-
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/ProvidersList.css";
 
-const ProvidersList = () => {
+const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
   const [location, setLocation] = useState("");
   const [filteredProviders, setFilteredProviders] = useState([]);
+  const [selectedQuantities, setSelectedQuantities] = useState({});
+  const [notification, setNotification] = useState(""); // Notification state
+  const navigate = useNavigate();
 
   const providers = [
     {
@@ -353,16 +356,16 @@ const ProvidersList = () => {
       id: 3,
       name: "Rajasthani Rasoi",
       cuisine: "Rajasthani | Pure Veg",
-      location: "Jaipur",
-      rating: 4.3,
-      reviews: 100,
-      menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
-      price: 85,
-      minDays: 6,
+      location: "Kota",
+      rating: 4.0,
+      reviews: 85,
+      menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
+      price: 90,
+      minDays: 5,
     },
   ];
 
-  // Filter providers based on location input
+  // Search and filter providers based on location
   const handleSearch = () => {
     const filtered = location.trim()
       ? providers.filter((provider) =>
@@ -372,10 +375,55 @@ const ProvidersList = () => {
     setFilteredProviders(filtered);
   };
 
-  // Trigger filtering when location changes
   useEffect(() => {
     handleSearch();
   }, [location]);
+
+  // Handle quantity change for a provider
+  const handleQuantityChange = (providerId, value) => {
+    setSelectedQuantities((prevState) => ({
+      ...prevState,
+      [providerId]: value,
+    }));
+  };
+
+  // Add provider to orders
+  const handleOrderNow = (provider) => {
+    const quantity = selectedQuantities[provider.id];
+
+    if (!quantity || quantity < 1) {
+      alert("Please select a valid quantity.");
+      return;
+    }
+
+    // Check if the provider is already in the orders
+    const isAlreadyOrdered = orders.some((order) => order.id === provider.id);
+    if (isAlreadyOrdered) {
+      alert("You have already ordered from this provider.");
+      return;
+    }
+
+    // Add the provider to orders with selected quantity
+    const newOrder = { ...provider, quantity, isConfirmed: false };
+
+    // Update orders state and tiffin count
+    setOrders((prevOrders) => {
+      const updatedOrders = [...prevOrders, newOrder];
+      setTiffinCount(updatedOrders.length); // Update tiffin count after adding an order
+      return updatedOrders;
+    });
+
+    // Show confirmation notification
+    setNotification(`Order confirmed for ${provider.name} with ${quantity} tiffins!`);
+
+    // Automatically hide notification after 3 seconds
+    setTimeout(() => {
+      console.log("Clearing notification");
+      setNotification(""); // Clear the notification
+    }, 3000);
+
+    navigate("/orders"); // Navigate to My Orders page
+  };
 
   return (
     <div className="providers-page">
@@ -390,6 +438,13 @@ const ProvidersList = () => {
         <button onClick={handleSearch}>Search</button>
       </header>
 
+      {/* Notification */}
+      {notification && (
+        <div className="notification">
+          <p>{notification}</p>
+        </div>
+      )}
+
       {/* Providers List */}
       <main className="providers-list">
         <h2>Today's Available Providers</h2>
@@ -398,49 +453,60 @@ const ProvidersList = () => {
           <div className="providers-container">
             {filteredProviders.map((provider) => (
               <div key={provider.id} className="provider-card">
-                {/* Provider Header */}
-                <div className="provider-header">
-                  <h3>{provider.name}</h3>
-                  <p>{provider.cuisine}</p>
-                  <p>{provider.location}</p>
-                  <p>
-                    <span className="rating">⭐ {provider.rating}</span> (
-                    {provider.reviews} reviews)
-                  </p>
+                <h3>{provider.name}</h3>
+                <p>{provider.cuisine}</p>
+                <p>{provider.location}</p>
+                <p>
+                  ⭐ {provider.rating} ({provider.reviews} reviews)
+                </p>
+                <p>
+                  <strong>Today's Menu:</strong> {provider.menu}
+                </p>
+                <p>₹{provider.price}/meal</p>
+                <p>Min order: {provider.minDays} days</p>
+
+                {/* Quantity Selector */}
+                <div className="quantity-selector">
+                  <button
+                    onClick={() => {
+                      if (selectedQuantities[provider.id] > 1) {
+                        handleQuantityChange(provider.id, selectedQuantities[provider.id] - 1);
+                      }
+                    }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={selectedQuantities[provider.id] || 0}
+                    onChange={(e) =>
+                      handleQuantityChange(provider.id, parseInt(e.target.value, 10))
+                    }
+                    min="1"
+                    max="5"
+                  />
+                  <button
+                    onClick={() => {
+                      if (selectedQuantities[provider.id] < 10) {
+                        handleQuantityChange(provider.id, selectedQuantities[provider.id] + 1);
+                      }
+                    }}
+                  >
+                    +
+                  </button>
                 </div>
 
-                {/* Provider Body */}
-                <div className="provider-body">
-                  <p>
-                    <strong>Today's Menu:</strong> {provider.menu}
-                  </p>
-                  <div className="order-section">
-                    <label htmlFor={`tiffin-quantity-${provider.id}`}>
-                      Number of Tiffins:
-                    </label>
-                    <select id={`tiffin-quantity-${provider.id}`}>
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <option key={num} value={num}>
-                          {num}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Provider Footer */}
-                <div className="provider-footer">
-                  <p>₹{provider.price}/meal</p>
-                  <p>Min order: {provider.minDays} days</p>
-                  <button className="order-btn">Order Now</button>
-                </div>
+                <button
+                  className="order-btn"
+                  onClick={() => handleOrderNow(provider)}
+                >
+                  Order Now
+                </button>
               </div>
             ))}
           </div>
         ) : (
-          <p className="no-providers">
-            No tiffin providers available for the entered location.
-          </p>
+          <p>No tiffin providers available for the entered location.</p>
         )}
       </main>
     </div>

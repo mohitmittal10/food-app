@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/Header.css";
 
-const Header = () => {
+const Header = ({ orderCount }) => {
   return (
     <header className="header">
       {/* Title Section */}
@@ -16,7 +16,8 @@ const Header = () => {
         <Link to="/">Home</Link>
         <Link to="/providers">Providers</Link>
         <Link to="/track">Track Order</Link>
-        <Link to="/orders">My Orders</Link>
+        {/* Display the order count in My Orders link */}
+        <Link to="/orders">My Orders ({orderCount || 0})</Link>
         <Link to="/login">Login</Link>
       </nav>
     </header>
