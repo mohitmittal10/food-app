@@ -15,6 +15,7 @@ const Header = ({ orderCount, user, onLogout }) => {
         <Link to="/providers">Providers</Link>
         <Link to="/track">Track Order</Link>
         <Link to="/orders">My Orders ({orderCount || 0})</Link>
+        <Link to="/admin">Admin</Link> {/* Added Admin Link */}
         {!user && <Link to="/login">Login</Link>}
         {user && (
           <>

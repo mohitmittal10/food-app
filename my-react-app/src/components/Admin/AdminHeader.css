@@ -1,0 +1,48 @@
+.header {
+    position: relative; /* Ensures elements inside can be absolutely positioned */
+    background-color: #2D6A4F; /* Forest Green */
+    color: white;
+    padding: 90px;
+  }
+  
+  .header-title {
+    text-align: center; /* Keeps the title in the center */
+    font-size: 15px;
+    font-weight: bold;
+    color: #FFFFFF; /* White text for the heading */
+  }
+  
+  .nav-links {
+    position: absolute; /* Positions the nav-links relative to the header */
+    top: 10px; /* Aligns the nav-links to the top */
+    right: 50px;
+    /* Positions nav-links towards the right with some padding */
+  }
+  
+  .nav-links a {
+    margin-left: 23px; /* Adds space between each link */
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-family: serif;
+  }
+  
+  .nav-links a:hover {
+    text-decoration: underline; /* Adds underline on hover */
+  }
+  
+  .header-button {
+    background-color: #80ED99; /* Mint Green button color */
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Added transition for smooth hover effect */
+  }
+  
+  .header-button:hover {
+    background-color: #40916C; /* Darker green hover effect */
+  }
+  

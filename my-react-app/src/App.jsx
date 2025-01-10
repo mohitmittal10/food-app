@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { auth } from "./components/signup/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Login from "./components/signup/Login";
@@ -11,6 +11,7 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Profile from "./components/Profile"; // Import the Profile component
+import Admin from "./components/Admin/admin"; // Ensure this matches the exact casing
 import "./styles/App.css";
 
 const App = () => {
@@ -55,7 +56,43 @@ const App = () => {
     setOrders(updatedOrders);
   };
 
+  const location = useLocation();
+
   return (
+    <div className="app">
+      {/* Render Header only if not on /admin route */}
+      {location.pathname !== "/admin" && <Header orderCount={tiffinCount} />}
+      <main>
+        <Routes>
+          <Route path="/" element={<Home2 />} />
+          <Route
+            path="/providers"
+            element={
+              <ProvidersList
+                orders={orders}
+                setOrders={setOrders}
+                setTiffinCount={setTiffinCount}
+              />
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <MyOrders
+                orders={orders}
+                cancelOrder={cancelOrder}
+                confirmOrder={confirmOrder}
+              />
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/home" element={<Home2 />} />
+          <Route path="/admin" element={<Admin />} /> {/* Added Admin route */}
+        </Routes>
+      </main>
+      <Footer />
+    </div>
     <Router>
       <div className="app">
         <Header orderCount={tiffinCount} user={user} onLogout={handleLogout} />
@@ -103,4 +140,8 @@ const App = () => {
   );
 };
 
-export default App;
+export default () => (
+  <Router>
+    <App />
+  </Router>
+);
