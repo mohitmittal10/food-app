@@ -1,35 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "./firebaseConfig";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import "./Login.css"; // Import the CSS file
-
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "./firebaseConfig"; // Ensure correct import of Firestore
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("Login Successful!");
-      navigate("/home");
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/home"); // Redirect to home if already logged in
+      }
+    });
 
-  const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
+    return () => unsubscribe(); // Clean up listener
+  }, [navigate]);
+  const saveUserDetails = async (user) => {
     try {
-      await signInWithPopup(auth, provider);
-      alert("Login with Google Successful!");
-      navigate("/home");
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+  
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          name: user.displayName || "Anonymous",
+          email: user.email,
+          createdAt: new Date().toISOString(),
+        });
+        console.log("User details saved successfully!");
+      }
     } catch (error) {
-      alert(error.message);
+      console.error("Error saving user details:", error);
     }
   };
+  // In handleEmailLogin
+const handleEmailLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await saveUserDetails(user); // Save details after login
+    alert("Login Successful!");
+    navigate("/home");
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+  // In handleGoogleLogin
+const handleGoogleLogin = async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    await saveUserDetails(user); // Save details after login
+    alert("Login with Google Successful!");
+    navigate("/home");
+  } catch (error) {
+    alert(error.message);
+  }
+};
 
   return (
     <div className="login-container">

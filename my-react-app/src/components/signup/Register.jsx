@@ -3,27 +3,46 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "./firebaseConfig";
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import "./Register.css"; // Import the CSS file
-
+// Save user details to Firestore
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
+  const saveUserDetails = async (user) => {
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        name: user.displayName || "Anonymous",
+        email: user.email,
+        createdAt: new Date().toISOString(),
+      });
+      console.log("User details saved successfully!");
+    } catch (error) {
+      console.error("Error saving user details:", error);
+    }
+  };
+  // In handleEmailRegister
   const handleEmailRegister = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      await saveUserDetails(user); // Save details after registration
       alert("Registration Successful!");
       navigate("/home");
     } catch (error) {
       alert(error.message);
-    }
+    } 
   };
 
+  // In handleGoogleRegister
   const handleGoogleRegister = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      await saveUserDetails(user); // Save details after registration
       alert("Registration with Google Successful!");
       navigate("/home");
     } catch (error) {

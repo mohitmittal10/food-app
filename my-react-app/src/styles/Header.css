@@ -45,3 +45,17 @@
 .header-button:hover {
   background-color: #40916C; /* Darker green hover effect */
 }
+.logout-button {
+  background-color: #f44336; /* Red color */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 10px;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
