@@ -8,10 +8,10 @@ import Home2 from "./components/Home";
 import ProvidersList from "./components/ProvidersList";
 import MyOrders from "./components/MyOrders";
 import Header from "./components/Header";
+import Footer from "./components/Footer"; // Ensure Footer is imported
 import ProtectedRoute from "./components/ProtectedRoute";
-
-import Profile from "./components/Profile"; // Import the Profile component
-import Admin from "./components/Admin/admin"; // Ensure this matches the exact casing
+import Profile from "./components/Profile";
+import Admin from "./components/Admin/admin"; // Ensure casing matches
 import "./styles/App.css";
 
 const App = () => {
@@ -61,7 +61,9 @@ const App = () => {
   return (
     <div className="app">
       {/* Render Header only if not on /admin route */}
-      {location.pathname !== "/admin" && <Header orderCount={tiffinCount} />}
+      {location.pathname !== "/admin" && (
+        <Header orderCount={tiffinCount} user={user} onLogout={handleLogout} />
+      )}
       <main>
         <Routes>
           <Route path="/" element={<Home2 />} />
@@ -88,55 +90,20 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={<Home2 />} />
-          <Route path="/admin" element={<Admin />} /> {/* Added Admin route */}
+          <Route path="/admin" element={<Admin />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute user={user}>
+                <Profile user={user} />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
-      <Footer />
+      {/* Include Footer if needed */}
+      {location.pathname !== "/admin" && <Footer />}
     </div>
-    <Router>
-      <div className="app">
-        <Header orderCount={tiffinCount} user={user} onLogout={handleLogout} />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home2 />} />
-            <Route
-              path="/providers"
-              element={
-                <ProvidersList
-                  orders={orders}
-                  setOrders={setOrders}
-                  setTiffinCount={setTiffinCount}
-                />
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <MyOrders
-                  orders={orders}
-                  cancelOrder={cancelOrder}
-                  confirmOrder={confirmOrder}
-                />
-              }
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/home" element={<Home2 />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute user={user}>
-                  <Profile user={user} />
-                </ProtectedRoute>
-              }
-            />
-           
-
-          </Routes>
-        </main>
-
-      </div>
-    </Router>
   );
 };
 
