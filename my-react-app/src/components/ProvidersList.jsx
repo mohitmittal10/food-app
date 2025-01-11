@@ -319,12 +319,13 @@
 
 // export default App;
 import React, { useState, useEffect } from "react";
+import { useMenu } from "./MenuContext";
 import Header from "./Header";
-
 import { useNavigate } from "react-router-dom";
 import "../styles/ProvidersList.css";
 
 const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
+  const { menuItems } = useMenu(); // Use context for menu items
   const [location, setLocation] = useState("");
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [selectedQuantities, setSelectedQuantities] = useState({});
@@ -339,7 +340,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
       location: "Jaipur",
       rating: 4.5,
       reviews: 120,
-      menu: "2 Rotis, Dal Fry, Mix Veg, Rice, Salad",
       price: 80,
       minDays: 7,
     },
@@ -350,7 +350,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
       location: "Ahmedabad",
       rating: 4.0,
       reviews: 85,
-      menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
       price: 90,
       minDays: 5,
     },
@@ -361,7 +360,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
       location: "Kota",
       rating: 4.0,
       reviews: 85,
-      menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
       price: 90,
       minDays: 5,
     },
@@ -420,7 +418,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
 
     // Automatically hide notification after 3 seconds
     setTimeout(() => {
-      console.log("Clearing notification");
       setNotification(""); // Clear the notification
     }, 3000);
 
@@ -429,7 +426,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
 
   return (
     <div className="providers-page">
-      
       {/* Search Bar */}
       <header className="search-bar">
         <input
@@ -462,11 +458,19 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
                 <p>
                   ⭐ {provider.rating} ({provider.reviews} reviews)
                 </p>
-                <p>
-                  <strong>Today's Menu:</strong> {provider.menu}
-                </p>
                 <p>₹{provider.price}/meal</p>
                 <p>Min order: {provider.minDays} days</p>
+
+                {/* Display only the description for today's menu */}
+                <h4>Today's Menu:</h4>
+                {menuItems
+                  .filter((item) => item.providerName === provider.name) // Filter menu items by provider name
+                  .map((item, index) => (
+                    <div key={index}>
+                      {/* Only show the description of the menu item */}
+                      <p>{item.description}</p>
+                    </div>
+                  ))}
 
                 {/* Quantity Selector */}
                 <div className="quantity-selector">

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "./admin.css";
 import AdminHeader from "./AdminHeader";
+import { useMenu } from "../MenuContext"; // Assuming you're using a context for menu items
 
 const AdminPage = () => {
+  const { addMenuItem } = useMenu(); // Using the context to add items
   const [selectedSection, setSelectedSection] = useState("orders");
   const [orders] = useState([
     {
@@ -12,74 +14,29 @@ const AdminPage = () => {
       item: "Pizza",
       address: "123 Main St, City, Country",
     },
-    {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    }, {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    }, {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    }, {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    }, {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    }, 
-    // Other orders here...
+    // Other orders...
   ]);
 
-  const [menuItems, setMenuItems] = useState([]);
-  const [newMenuItem, setNewMenuItem] = useState({
+  const [newItem, setNewItem] = useState({
     name: "",
     description: "",
     price: "",
-    image: "",
+    providerName: "", // Make sure to add providerName for the new item
   });
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewMenuItem({
-      ...newMenuItem,
-      [name]: value,
-    });
+    setNewItem((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    setNewMenuItem({
-      ...newMenuItem,
-      image: URL.createObjectURL(e.target.files[0]),
-    });
-  };
-
-  const handleAddMenuItem = () => {
-    if (newMenuItem.name && newMenuItem.price) {
-      setMenuItems([...menuItems, newMenuItem]);
-      setNewMenuItem({
-        name: "",
-        description: "",
-        price: "",
-        image: "",
-      });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newItem.name && newItem.price && newItem.providerName) {
+      addMenuItem({ ...newItem, price: parseFloat(newItem.price) });
+      setNewItem({ name: "", description: "", price: "", providerName: "" });
+      alert("Menu item added successfully!");
     } else {
-      alert("Please fill out all required fields.");
+      alert("Please fill in all fields!");
     }
   };
 
@@ -119,7 +76,6 @@ const AdminPage = () => {
             <>
               <h2>Today's Orders</h2>
               <hr />
-              <br />
               <div className="orders">
                 {orders.map((order, index) => (
                   <div key={index} className="order-card">
@@ -153,14 +109,14 @@ const AdminPage = () => {
             <>
               <h2>Add New Menu Item</h2>
               <div className="add-menu">
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label>Name</label>
                     <input
                       type="text"
                       name="name"
-                      value={newMenuItem.name}
-                      onChange={handleInputChange}
+                      value={newItem.name}
+                      onChange={handleChange}
                       required
                     />
                   </div>
@@ -168,8 +124,8 @@ const AdminPage = () => {
                     <label>Description</label>
                     <textarea
                       name="description"
-                      value={newMenuItem.description}
-                      onChange={handleInputChange}
+                      value={newItem.description}
+                      onChange={handleChange}
                     />
                   </div>
                   <div className="form-group">
@@ -177,37 +133,28 @@ const AdminPage = () => {
                     <input
                       type="number"
                       name="price"
-                      value={newMenuItem.price}
-                      onChange={handleInputChange}
+                      value={newItem.price}
+                      onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="form-group">
-                    <label>Image</label>
+                    <label>Provider Name</label>
                     <input
-                      type="file"
-                      name="image"
-                      onChange={handleImageChange}
+                      type="text"
+                      name="providerName"
+                      value={newItem.providerName}
+                      onChange={handleChange}
+                      required
                     />
                   </div>
-                  <button type="button" onClick={handleAddMenuItem}>
-                    Add Item
-                  </button>
+                  <button type="submit">Add Item</button>
                 </form>
 
                 <div className="menu-preview">
                   <h3>Menu Preview</h3>
                   <div className="menu-items">
-                    {menuItems.map((item, index) => (
-                      <div key={index} className="menu-item-card">
-                        <img src={item.image} alt={item.name} />
-                        <h4>{item.name}</h4>
-                        <p>{item.description}</p>
-                        <p>
-                          <strong>Price:</strong>₹{item.price}
-                        </p>
-                      </div>
-                    ))}
+                    {/* Add preview logic for newly added items here */}
                   </div>
                 </div>
               </div>
