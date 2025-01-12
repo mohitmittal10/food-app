@@ -10,11 +10,13 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   const saveUserDetails = async (user) => {
     try {
       await setDoc(doc(db, "users", user.uid), {
         name: user.displayName || "Anonymous",
         email: user.email,
+        user: "user",
         createdAt: new Date().toISOString(),
       });
       console.log("User details saved successfully!");
