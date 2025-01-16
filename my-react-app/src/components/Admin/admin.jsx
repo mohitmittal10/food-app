@@ -1,39 +1,32 @@
 import React, { useState } from "react";
+import { useOrders } from "../OrderContext"; // Use your OrderContext to fetch orders
+import { useMenu } from "../MenuContext"; // Use your MenuContext to fetch and add menu items
 import "./admin.css";
 import AdminHeader from "./AdminHeader";
-import { useMenu } from "../MenuContext"; // Assuming you're using a context for menu items
 
 const AdminPage = () => {
-  const { addMenuItem } = useMenu(); // Using the context to add items
-  const [selectedSection, setSelectedSection] = useState("orders");
-  const [orders] = useState([
-    {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    },
-    // Other orders...
-  ]);
-
+  const { orders } = useOrders(); // Fetch orders from OrderContext
+  const { addMenuItem, menuItems } = useMenu(); // Fetch menu items from MenuContext
+  const [selectedSection, setSelectedSection] = useState("orders"); // State to manage selected section
   const [newItem, setNewItem] = useState({
     name: "",
     description: "",
     price: "",
-    providerName: "", // Make sure to add providerName for the new item
+    providerName: "",
   });
 
+  // Handle form input changes for new menu item
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewItem((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Submit new menu item
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newItem.name && newItem.price && newItem.providerName) {
-      addMenuItem({ ...newItem, price: parseFloat(newItem.price) });
-      setNewItem({ name: "", description: "", price: "", providerName: "" });
+      addMenuItem({ ...newItem, price: parseFloat(newItem.price) }); // Add new item to the context
+      setNewItem({ name: "", description: "", price: "", providerName: "" }); // Clear form fields
       alert("Menu item added successfully!");
     } else {
       alert("Please fill in all fields!");
@@ -72,39 +65,33 @@ const AdminPage = () => {
         </nav>
 
         <main className="main-content">
+          {/* Orders Section */}
           {selectedSection === "orders" && (
             <>
               <h2>Today's Orders</h2>
               <hr />
               <div className="orders">
-                {orders.map((order, index) => (
-                  <div key={index} className="order-card">
-                    <p>
-                      <strong>Name:</strong> {order.name}
-                    </p>
-                    <p>
-                      <strong>Mobile:</strong> {order.phone}
-                    </p>
-                    <p>
-                      <strong>Quantity:</strong> {order.quantity}
-                    </p>
-                    <p>
-                      <strong>Ordered Item:</strong> {order.item}
-                    </p>
-                    <p>
-                      <strong>Address:</strong> {order.address}
-                    </p>
-                    <div>
-                      <a href="#" id="loc">
-                        Location
-                      </a>
+                {orders.length ? (
+                  orders.map((order) => (
+                    <div key={order.id} className="order-card">
+                      <p><strong>Name:</strong> {order.name}</p>
+                      <p><strong>Mobile:</strong> {order.phone}</p>
+                      <p><strong>Quantity:</strong> {order.quantity}</p>
+                      <p><strong>Ordered Item:</strong> {order.item}</p>
+                      <p><strong>Address:</strong> {order.address}</p>
+                      <div>
+                        <a href="#" id="loc">Location</a>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p>No orders available for today.</p>
+                )}
               </div>
             </>
           )}
 
+          {/* Add Menu Section */}
           {selectedSection === "addMenu" && (
             <>
               <h2>Add New Menu Item</h2>
@@ -129,7 +116,7 @@ const AdminPage = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Price</label>
+                    <label>Price (₹)</label>
                     <input
                       type="number"
                       name="price"
@@ -151,11 +138,23 @@ const AdminPage = () => {
                   <button type="submit">Add Item</button>
                 </form>
 
+                {/* Menu Preview */}
                 <div className="menu-preview">
                   <h3>Menu Preview</h3>
-                  <div className="menu-items">
-                    {/* Add preview logic for newly added items here */}
-                  </div>
+                  {menuItems.length ? (
+                    <div className="menu-items">
+                      {menuItems.map((item, index) => (
+                        <div key={index} className="menu-item">
+                          <p><strong>Name:</strong> {item.name}</p>
+                          <p><strong>Description:</strong> {item.description}</p>
+                          <p><strong>Price:</strong> ₹{item.price.toFixed(2)}</p>
+                          <p><strong>Provider:</strong> {item.providerName}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No menu items available.</p>
+                  )}
                 </div>
               </div>
             </>

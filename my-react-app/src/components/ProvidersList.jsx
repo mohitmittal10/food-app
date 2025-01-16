@@ -320,16 +320,17 @@
 // export default App;
 import React, { useState, useEffect } from "react";
 import { useMenu } from "./MenuContext";
-import Header from "./Header";
+import { useOrders } from "./OrderContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/ProvidersList.css";
 
-const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
-  const { menuItems } = useMenu(); // Use context for menu items
+const ProvidersList = ({ setTiffinCount }) => {
+  const { menuItems } = useMenu();
+  const { orders, addOrder } = useOrders();
   const [location, setLocation] = useState("");
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [selectedQuantities, setSelectedQuantities] = useState({});
-  const [notification, setNotification] = useState(""); // Notification state
+  const [notification, setNotification] = useState("");
   const navigate = useNavigate();
 
   const providers = [
@@ -365,7 +366,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
     },
   ];
 
-  // Search and filter providers based on location
   const handleSearch = () => {
     const filtered = location.trim()
       ? providers.filter((provider) =>
@@ -379,7 +379,6 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
     handleSearch();
   }, [location]);
 
-  // Handle quantity change for a provider
   const handleQuantityChange = (providerId, value) => {
     setSelectedQuantities((prevState) => ({
       ...prevState,
@@ -387,46 +386,47 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
     }));
   };
 
-  // Add provider to orders
   const handleOrderNow = (provider) => {
-    const quantity = selectedQuantities[provider.id];
+    try {
+      const quantity = selectedQuantities[provider.id];
 
-    if (!quantity || quantity < 1) {
-      alert("Please select a valid quantity.");
-      return;
+      if (!quantity || quantity < 1) {
+        alert("Please select a valid quantity.");
+        return;
+      }
+
+      const isAlreadyOrdered = orders.some((order) => order.id === provider.id);
+      if (isAlreadyOrdered) {
+        alert("You have already ordered from this provider.");
+        return;
+      }
+
+      const newOrder = { 
+        ...provider, 
+        quantity, 
+        isConfirmed: false,
+        orderDate: new Date().toISOString()
+      };
+      
+      addOrder(newOrder);
+
+      if (setTiffinCount) {
+        setTiffinCount(orders.length + 1);
+      }
+
+      setNotification(`Order confirmed for ${provider.name} with ${quantity} tiffins!`);
+
+      setTimeout(() => {
+        setNotification("");
+        navigate("/orders");
+      }, 3000);
+    } catch (error) {
+      alert(`Error placing order: ${error.message}`);
     }
-
-    // Check if the provider is already in the orders
-    const isAlreadyOrdered = orders.some((order) => order.id === provider.id);
-    if (isAlreadyOrdered) {
-      alert("You have already ordered from this provider.");
-      return;
-    }
-
-    // Add the provider to orders with selected quantity
-    const newOrder = { ...provider, quantity, isConfirmed: false };
-
-    // Update orders state and tiffin count
-    setOrders((prevOrders) => {
-      const updatedOrders = [...prevOrders, newOrder];
-      setTiffinCount(updatedOrders.length); // Update tiffin count after adding an order
-      return updatedOrders;
-    });
-
-    // Show confirmation notification
-    setNotification(`Order confirmed for ${provider.name} with ${quantity} tiffins!`);
-
-    // Automatically hide notification after 3 seconds
-    setTimeout(() => {
-      setNotification(""); // Clear the notification
-    }, 3000);
-
-    navigate("/orders"); // Navigate to My Orders page
   };
 
   return (
     <div className="providers-page">
-      {/* Search Bar */}
       <header className="search-bar">
         <input
           type="text"
@@ -437,14 +437,12 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
         <button onClick={handleSearch}>Search</button>
       </header>
 
-      {/* Notification */}
       {notification && (
         <div className="notification">
           <p>{notification}</p>
         </div>
       )}
 
-      {/* Providers List */}
       <main className="providers-list">
         <h2>Today's Available Providers</h2>
 
@@ -461,23 +459,23 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
                 <p>₹{provider.price}/meal</p>
                 <p>Min order: {provider.minDays} days</p>
 
-                {/* Display only the description for today's menu */}
                 <h4>Today's Menu:</h4>
                 {menuItems
-                  .filter((item) => item.providerName === provider.name) // Filter menu items by provider name
+                  .filter((item) => item.providerName === provider.name)
                   .map((item, index) => (
                     <div key={index}>
-                      {/* Only show the description of the menu item */}
                       <p>{item.description}</p>
                     </div>
                   ))}
 
-                {/* Quantity Selector */}
                 <div className="quantity-selector">
                   <button
                     onClick={() => {
                       if (selectedQuantities[provider.id] > 1) {
-                        handleQuantityChange(provider.id, selectedQuantities[provider.id] - 1);
+                        handleQuantityChange(
+                          provider.id,
+                          selectedQuantities[provider.id] - 1
+                        );
                       }
                     }}
                   >
@@ -490,12 +488,15 @@ const ProvidersList = ({ orders, setOrders, setTiffinCount }) => {
                       handleQuantityChange(provider.id, parseInt(e.target.value, 10))
                     }
                     min="1"
-                    max="5"
+                    max="10"
                   />
                   <button
                     onClick={() => {
                       if (selectedQuantities[provider.id] < 10) {
-                        handleQuantityChange(provider.id, selectedQuantities[provider.id] + 1);
+                        handleQuantityChange(
+                          provider.id,
+                          (selectedQuantities[provider.id] || 0) + 1
+                        );
                       }
                     }}
                   >
