@@ -1,48 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { auth } from "./components/signup/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { AuthProvider, useAuth } from "./AuthContext"; // Import the new AuthContext
 import Login from "./components/signup/Login";
 import Register from "./components/signup/Register";
 import Home2 from "./components/Home";
 import ProvidersList from "./components/ProvidersList";
 import MyOrders from "./components/MyOrders";
 import Header from "./components/Header";
-import Footer from "./components/Footer"; // Ensure Footer is imported
+import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./components/Profile";
-import Admin from "./components/Admin/admin"; // Ensure casing matches
+import ProviderProfile from "./components/Provider/ProviderProfile";
+import ProviderLogin from "./components/Provider/ProviderLogin";
+import ProviderRegister from "./components/Provider/ProviderRegister";
+import Admin from "./components/Admin/admin";
 import "./styles/App.css";
 
-const App = () => {
+const AppContent = () => {
   const [orders, setOrders] = useState([]);
   const [tiffinCount, setTiffinCount] = useState(0);
-  const [user, setUser] = useState(null); // State to store user details
+  const { user, loading, handleLogout } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser({
-          name: user.displayName || "Guest", // Default to "Guest" if displayName is not available
-          email: user.email,
-        });
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      alert("Logged out successfully!");
-    } catch (error) {
-      alert("Error logging out: " + error.message);
-    }
-  };
-
+  // Handle orders
   const cancelOrder = (orderId) => {
     const updatedOrders = orders.filter((order) => order.id !== orderId);
     setOrders(updatedOrders);
@@ -56,13 +36,18 @@ const App = () => {
     setOrders(updatedOrders);
   };
 
-  const location = useLocation();
+  if (loading) {
+    return <div>Loading...</div>; // Add proper loading state UI
+  }
 
   return (
     <div className="app">
-      {/* Render Header only if not on /admin route */}
       {location.pathname !== "/admin" && (
-        <Header orderCount={tiffinCount} user={user} onLogout={handleLogout} />
+        <Header
+          orderCount={tiffinCount}
+          user={user}
+          onLogout={handleLogout}
+        />
       )}
       <main>
         <Routes>
@@ -80,35 +65,53 @@ const App = () => {
           <Route
             path="/orders"
             element={
-              <MyOrders
-                orders={orders}
-                cancelOrder={cancelOrder}
-                confirmOrder={confirmOrder}
-              />
+              <ProtectedRoute user={user}>
+                <MyOrders
+                  orders={orders}
+                  cancelOrder={cancelOrder}
+                  confirmOrder={confirmOrder}
+                />
+              </ProtectedRoute>
             }
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/provider/login" element={<ProviderLogin />} />
+          <Route path="/provider/register" element={<ProviderRegister />} />
           <Route path="/home" element={<Home2 />} />
           <Route path="/admin" element={<Admin />} />
           <Route
+            path="/provider/profile"
+            element={
+              <ProtectedRoute requiredRole="provider">
+                <ProviderProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/profile"
             element={
-              <ProtectedRoute user={user}>
-                <Profile user={user} />
+              <ProtectedRoute requiredRole="user">
+                <Profile />
               </ProtectedRoute>
             }
           />
         </Routes>
       </main>
-      {/* Include Footer if needed */}
       {location.pathname !== "/admin" && <Footer />}
     </div>
   );
 };
 
-export default () => (
-  <Router>
-    <App />
-  </Router>
-);
+const App = () => {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
+  );
+};
+
+export default App;

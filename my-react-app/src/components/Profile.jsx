@@ -93,7 +93,9 @@ const Profile = () => {
       <h1>Profile</h1>
       <p><strong>Name:</strong> {userDetails.name}</p>
       <p><strong>Email:</strong> {userDetails.email}</p>
-      <p><strong>Account Created:</strong> {userDetails.createdAt}</p>
+      <p><strong>Address:</strong>{userDetails.address}</p>
+      <p><strong>Contact:</strong>{userDetails.contact}</p>
+      {/* <p><strong>Account Created:</strong> {userDetails.createdAt}</p> */}
     </div>
   );
 };

@@ -1,0 +1,25 @@
+/* styles.css */
+:root {
+    --primary-color: #4A90E2;
+    --secondary-color: #34495E;
+    --success-color: #2ECC71;
+    --danger-color: #E74C3C;
+    --light-gray: #F5F6FA;
+    --dark-gray: #2C3E50;
+    --white: #FFFFFF;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+  
+  /* Common Styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--light-gray);
+  }
