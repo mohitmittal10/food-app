@@ -8,16 +8,22 @@ import ProvidersList from "./components/ProvidersList";
 import MyOrders from "./components/MyOrders";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./components/Profile";
 import ProviderProfile from "./components/Provider/ProviderProfile";
 import ProviderLogin from "./components/Provider/ProviderLogin";
 import ProviderRegister from "./components/Provider/ProviderRegister";
 import Admin from "./components/Admin/admin";
+import Admin from "./components/Admin/admin";
+import { OrderProvider } from "./components/OrderContext";
+import { MenuProvider } from "./components/MenuContext";
 import "./styles/App.css";
 
 const AppContent = () => {
   const [orders, setOrders] = useState([]);
+const AppContent = () => {
+  const [user, setUser] = useState(null);
   const [tiffinCount, setTiffinCount] = useState(0);
   const { user, loading, handleLogout } = useAuth();
   const location = useLocation();
@@ -39,6 +45,31 @@ const AppContent = () => {
   if (loading) {
     return <div>Loading...</div>; // Add proper loading state UI
   }
+  const location = useLocation();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          name: user.displayName || "Guest",
+          email: user.email,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully!");
+    } catch (error) {
+      alert("Error logging out: " + error.message);
+    }
+  };
 
   return (
     <div className="app">
@@ -54,14 +85,9 @@ const AppContent = () => {
           <Route path="/" element={<Home2 />} />
           <Route
             path="/providers"
-            element={
-              <ProvidersList
-                orders={orders}
-                setOrders={setOrders}
-                setTiffinCount={setTiffinCount}
-              />
-            }
+            element={<ProvidersList setTiffinCount={setTiffinCount} />}
           />
+          <Route path="/orders" element={<MyOrders />} />
           <Route
             path="/orders"
             element={
@@ -104,6 +130,15 @@ const AppContent = () => {
   );
 };
 
+const App = () => (
+  <MenuProvider>
+    <OrderProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </OrderProvider>
+  </MenuProvider>
+);
 const App = () => {
   return (
     <Router>
@@ -114,4 +149,5 @@ const App = () => {
   );
 };
 
+export default App;
 export default App;

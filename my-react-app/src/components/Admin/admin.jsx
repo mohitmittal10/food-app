@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useOrders } from "../OrderContext"; // Use your OrderContext to fetch orders
+import { useMenu } from "../MenuContext"; // Use your MenuContext to fetch and add menu items
 import { motion, AnimatePresence } from "framer-motion";
 import { auth, db } from "../signup/firebaseConfig";
 import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
@@ -6,6 +8,9 @@ import AdminHeader from "./AdminHeader";
 import "./admin.css";
 
 const AdminPage = () => {
+  const { orders } = useOrders(); // Fetch orders from OrderContext
+  const { addMenuItem, menuItems } = useMenu(); // Fetch menu items from MenuContext
+  const [selectedSection, setSelectedSection] = useState("orders"); // State to manage selected section
   const [selectedSection, setSelectedSection] = useState("profile");
   const [providerProfile, setProviderProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +58,7 @@ const AdminPage = () => {
     fetchData();
   }, []);
 
+  // Handle form input changes for new menu item
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNewItem(prev => ({
@@ -61,6 +67,7 @@ const AdminPage = () => {
     }));
   };
 
+  // Submit new menu item
   const handleSubmit = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -88,7 +95,7 @@ const AdminPage = () => {
         id: docRef.id,
         ...newItem,
         price: parseFloat(newItem.price)
-      }]);
+      }]); // Add new item to the context
 
       setNewItem({
         name: "",
@@ -96,7 +103,7 @@ const AdminPage = () => {
         price: "",
         category: "",
         isAvailable: true
-      });
+      }); // Clear form fields
 
       alert("Menu item added successfully!");
     } catch (error) {
@@ -218,6 +225,38 @@ const AdminPage = () => {
         </motion.nav>
 
         <main className="main-content">
+          {/* Orders Section */}
+          {selectedSection === "orders" && (
+            <>
+              <h2>Today's Orders</h2>
+              <hr />
+              <div className="orders">
+                {orders.length ? (
+                  orders.map((order) => (
+                    <div key={order.id} className="order-card">
+                      <p><strong>Name:</strong> {order.name}</p>
+                      <p><strong>Mobile:</strong> {order.phone}</p>
+                      <p><strong>Quantity:</strong> {order.quantity}</p>
+                      <p><strong>Ordered Item:</strong> {order.item}</p>
+                      <p><strong>Address:</strong> {order.address}</p>
+                      <div>
+                        <a href="#" id="loc">Location</a>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No orders available for today.</p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Add Menu Section */}
+          {selectedSection === "addMenu" && (
+            <>
+              <h2>Add New Menu Item</h2>
+              <div className="add-menu">
+                <form onSubmit={handleSubmit}>
           <AnimatePresence mode="wait">
             {selectedSection === "profile" && !isLoading && renderProfile()}
             {selectedSection === "orders" && renderOrders()}
@@ -263,7 +302,7 @@ const AdminPage = () => {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="price">Price (₹)*</label>
+                    <label htmlFor="price">Price (₹)* (₹)</label>
                     <input
                       type="number"
                       id="price"
@@ -293,6 +332,30 @@ const AdminPage = () => {
                       <option value="snacks">Snacks</option>
                     </select>
                   </div>
+                  <button type="submit">Add Item</button>
+                </form>
+
+                {/* Menu Preview */}
+                <div className="menu-preview">
+                  <h3>Menu Preview</h3>
+                  {menuItems.length ? (
+                    <div className="menu-items">
+                      {menuItems.map((item, index) => (
+                        <div key={index} className="menu-item">
+                          <p><strong>Name:</strong> {item.name}</p>
+                          <p><strong>Description:</strong> {item.description}</p>
+                          <p><strong>Price:</strong> ₹{item.price.toFixed(2)}</p>
+                          <p><strong>Provider:</strong> {item.providerName}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No menu items available.</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
                   <div className="form-group">
                     <label>

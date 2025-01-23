@@ -1,50 +1,55 @@
 import React, { createContext, useState, useContext } from "react";
 
-// Create Context
 const MenuContext = createContext();
 
-// Custom Hook to use Context
-export const useMenu = () => useContext(MenuContext);
+export const useMenu = () => {
+  const context = useContext(MenuContext);
+  if (!context) {
+    throw new Error('useMenu must be used within a MenuProvider');
+  }
+  return context;
+};
 
-// Provider Component
 export const MenuProvider = ({ children }) => {
   const [menuItems, setMenuItems] = useState([
     {
-      name: "",
+      name: "North Indian Thali",
       price: 80,
       description: "",
-      providerName: "Maa's Kitchen", // Added providerName to associate with a provider
+      providerName: "Maa's Kitchen",
     },
     {
-      name: "",
+      name: "Rajasthani Thali",
       price: 100,
       description: "",
-      providerName: "Rajasthani Rasoi", // Added providerName
+      providerName: "Rajasthani Rasoi",
     },
     {
-      name: "", // The unwanted item
+      name: "Gujarati Thali",
       price: 90,
       description: "",
-      providerName: "Gujarati Rasoi", // Added providerName
+      providerName: "Gujarati Rasoi",
     },
   ]);
 
-  // Function to add menu item
   const addMenuItem = (newItem) => {
-    if (newItem.name !== "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet") {
-      setMenuItems((prevItems) => [...prevItems, newItem]);
-    } else {
-      alert("This menu item is restricted and cannot be added.");
-    }
+    setMenuItems((prevItems) => [...prevItems, newItem]);
   };
 
-  // Filter the unwanted menu item from the displayed menu items (across all providers)
-  const filteredMenuItems = menuItems.filter(
-    (item) => item.name !== "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet"
-  );
+  const updateMenuItem = (providerName, updatedItem) => {
+    setMenuItems((prevItems) =>
+      prevItems.map((item) =>
+        item.providerName === providerName ? { ...item, ...updatedItem } : item
+      )
+    );
+  };
 
   return (
-    <MenuContext.Provider value={{ menuItems: filteredMenuItems, addMenuItem }}>
+    <MenuContext.Provider value={{ 
+      menuItems, 
+      addMenuItem, 
+      updateMenuItem 
+    }}>
       {children}
     </MenuContext.Provider>
   );
