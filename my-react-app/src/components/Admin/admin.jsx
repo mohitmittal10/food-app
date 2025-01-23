@@ -10,28 +10,16 @@ import "./admin.css";
 const AdminPage = () => {
   const { orders } = useOrders(); // Fetch orders from OrderContext
   const { addMenuItem, menuItems } = useMenu(); // Fetch menu items from MenuContext
-  const [selectedSection, setSelectedSection] = useState("orders"); // State to manage selected section
   const [selectedSection, setSelectedSection] = useState("profile");
   const [providerProfile, setProviderProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [menuItems, setMenuItems] = useState([]);
-
-  const [orders] = useState([
-    {
-      name: "John Doe",
-      phone: "123-456-7890",
-      quantity: 2,
-      item: "Pizza",
-      address: "123 Main St, City, Country",
-    },
-  ]);
-
+  const [menuItemsState, setMenuItemsState] = useState([]);
   const [newItem, setNewItem] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
-    isAvailable: true
+    isAvailable: true,
   });
 
   useEffect(() => {
@@ -46,11 +34,11 @@ const AdminPage = () => {
 
         const menuRef = collection(db, "providers", user.uid, "menu");
         const menuSnap = await getDocs(menuRef);
-        const items = menuSnap.docs.map(doc => ({
+        const items = menuSnap.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
-        setMenuItems(items);
+        setMenuItemsState(items);
       }
       setIsLoading(false);
     };
@@ -58,20 +46,18 @@ const AdminPage = () => {
     fetchData();
   }, []);
 
-  // Handle form input changes for new menu item
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNewItem(prev => ({
+    setNewItem((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  // Submit new menu item
   const handleSubmit = async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
-    
+
     if (!user) {
       alert("You must be logged in to add menu items");
       return;
@@ -88,22 +74,25 @@ const AdminPage = () => {
         ...newItem,
         price: parseFloat(newItem.price),
         providerId: user.uid,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
 
-      setMenuItems(prev => [...prev, {
-        id: docRef.id,
-        ...newItem,
-        price: parseFloat(newItem.price)
-      }]); // Add new item to the context
+      setMenuItemsState((prev) => [
+        ...prev,
+        {
+          id: docRef.id,
+          ...newItem,
+          price: parseFloat(newItem.price),
+        },
+      ]);
 
       setNewItem({
         name: "",
         description: "",
         price: "",
         category: "",
-        isAvailable: true
-      }); // Clear form fields
+        isAvailable: true,
+      });
 
       alert("Menu item added successfully!");
     } catch (error) {
@@ -114,17 +103,17 @@ const AdminPage = () => {
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5, staggerChildren: 0.1 }
+      transition: { duration: 0.5, staggerChildren: 0.1 },
     },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } }
+    visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
   };
 
   const renderProfile = () => (
@@ -176,14 +165,6 @@ const AdminPage = () => {
             <p><strong>Quantity:</strong> {order.quantity}</p>
             <p><strong>Ordered Item:</strong> {order.item}</p>
             <p><strong>Address:</strong> {order.address}</p>
-            <motion.a
-              href="#"
-              id="loc"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Location
-            </motion.a>
           </motion.div>
         ))}
       </motion.div>
@@ -194,7 +175,7 @@ const AdminPage = () => {
     <>
       <AdminHeader />
       <div className="admin-page">
-        <motion.nav 
+        <motion.nav
           className="admin-navbar"
           initial={{ x: -100 }}
           animate={{ x: 0 }}
@@ -210,7 +191,7 @@ const AdminPage = () => {
             </motion.h1>
           </div>
           <ul className="nav-items">
-            {["profile", "orders", "addMenu", "reviews", "faqs", "help"].map((item) => (
+            {["profile", "orders", "addMenu"].map((item) => (
               <motion.li
                 key={item}
                 whileHover={{ scale: 1.1, color: "#ff4757" }}
@@ -225,38 +206,6 @@ const AdminPage = () => {
         </motion.nav>
 
         <main className="main-content">
-          {/* Orders Section */}
-          {selectedSection === "orders" && (
-            <>
-              <h2>Today's Orders</h2>
-              <hr />
-              <div className="orders">
-                {orders.length ? (
-                  orders.map((order) => (
-                    <div key={order.id} className="order-card">
-                      <p><strong>Name:</strong> {order.name}</p>
-                      <p><strong>Mobile:</strong> {order.phone}</p>
-                      <p><strong>Quantity:</strong> {order.quantity}</p>
-                      <p><strong>Ordered Item:</strong> {order.item}</p>
-                      <p><strong>Address:</strong> {order.address}</p>
-                      <div>
-                        <a href="#" id="loc">Location</a>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No orders available for today.</p>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Add Menu Section */}
-          {selectedSection === "addMenu" && (
-            <>
-              <h2>Add New Menu Item</h2>
-              <div className="add-menu">
-                <form onSubmit={handleSubmit}>
           <AnimatePresence mode="wait">
             {selectedSection === "profile" && !isLoading && renderProfile()}
             {selectedSection === "orders" && renderOrders()}
@@ -271,8 +220,7 @@ const AdminPage = () => {
                 <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
                   Manage Menu Items
                 </motion.h2>
-                
-                <motion.form 
+                <motion.form
                   onSubmit={handleSubmit}
                   variants={itemVariants}
                   className="add-menu-form"
@@ -289,7 +237,6 @@ const AdminPage = () => {
                       className="w-full p-2 border rounded"
                     />
                   </div>
-
                   <div className="form-group">
                     <label htmlFor="description">Description</label>
                     <textarea
@@ -300,9 +247,8 @@ const AdminPage = () => {
                       className="w-full p-2 border rounded"
                     />
                   </div>
-
                   <div className="form-group">
-                    <label htmlFor="price">Price (₹)* (₹)</label>
+                    <label htmlFor="price">Price (₹)*</label>
                     <input
                       type="number"
                       id="price"
@@ -315,7 +261,6 @@ const AdminPage = () => {
                       className="w-full p-2 border rounded"
                     />
                   </div>
-
                   <div className="form-group">
                     <label htmlFor="category">Category</label>
                     <select
@@ -332,31 +277,6 @@ const AdminPage = () => {
                       <option value="snacks">Snacks</option>
                     </select>
                   </div>
-                  <button type="submit">Add Item</button>
-                </form>
-
-                {/* Menu Preview */}
-                <div className="menu-preview">
-                  <h3>Menu Preview</h3>
-                  {menuItems.length ? (
-                    <div className="menu-items">
-                      {menuItems.map((item, index) => (
-                        <div key={index} className="menu-item">
-                          <p><strong>Name:</strong> {item.name}</p>
-                          <p><strong>Description:</strong> {item.description}</p>
-                          <p><strong>Price:</strong> ₹{item.price.toFixed(2)}</p>
-                          <p><strong>Provider:</strong> {item.providerName}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>No menu items available.</p>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-
                   <div className="form-group">
                     <label>
                       <input
@@ -368,7 +288,6 @@ const AdminPage = () => {
                       Available
                     </label>
                   </div>
-
                   <motion.button
                     type="submit"
                     whileHover={{ scale: 1.05 }}
@@ -381,7 +300,7 @@ const AdminPage = () => {
 
                 <motion.div variants={containerVariants} className="menu-items-list">
                   <h3 className="text-xl font-bold mt-8 mb-4">Current Menu Items</h3>
-                  {menuItems.map((item) => (
+                  {menuItemsState.map((item) => (
                     <motion.div
                       key={item.id}
                       variants={itemVariants}
@@ -390,8 +309,8 @@ const AdminPage = () => {
                       <h4 className="font-bold">{item.name}</h4>
                       <p>{item.description}</p>
                       <p className="text-green-600">₹{item.price}</p>
-                      <p>Category: {item.category || 'Uncategorized'}</p>
-                      <p>{item.isAvailable ? 'Available' : 'Not Available'}</p>
+                      <p>Category: {item.category || "Uncategorized"}</p>
+                      <p>{item.isAvailable ? "Available" : "Not Available"}</p>
                     </motion.div>
                   ))}
                 </motion.div>

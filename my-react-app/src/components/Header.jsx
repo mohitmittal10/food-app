@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from '../AuthContext'; // Update path as needed
 import "../styles/Header.css";
-import "../styles/Styles.css"
-
-
+import "../styles/Styles.css";
 import { motion } from "framer-motion";
 
-
-const Header = ({ orderCount, user, onLogout }) => {
+const Header = ({ orderCount }) => {
+  const { user, handleLogout } = useAuth();
+  
   const isProvider = user?.role === "provider";
-  const isAuthenticated = user?.isAuthenticated;
+  const isAuthenticated = Boolean(user); // Simplified authentication check
 
   const navVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -67,18 +67,24 @@ const Header = ({ orderCount, user, onLogout }) => {
           <Link to="/providers" className="nav-link">Providers</Link>
         </motion.div>
         
-        {isAuthenticated && (
+        {isAuthenticated ? (
           <>
             <motion.div variants={linkVariants} whileHover="hover">
-              <Link to="/track" className="nav-link">Track Order</Link>
+              <Link to={isProvider ? "/admin" : "/profile"} className="nav-link">
+                Profile
+              </Link>
             </motion.div>
-            <motion.div variants={linkVariants} whileHover="hover">
-              <Link to="/orders" className="nav-link">My Orders ({orderCount || 0})</Link>
-            </motion.div>
+            <motion.button
+              variants={linkVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleLogout}
+              className="logout-button bg-red-500 text-white px-4 py-2 rounded-lg"
+            >
+              Logout
+            </motion.button>
           </>
-        )}
-
-        {!isAuthenticated && (
+        ) : (
           <>
             <motion.div variants={linkVariants} whileHover="hover">
               <Link to="/provider/register" className="nav-link">Provider Register</Link>
@@ -92,25 +98,6 @@ const Header = ({ orderCount, user, onLogout }) => {
             <motion.div variants={linkVariants} whileHover="hover">
               <Link to="/register" className="nav-link">Register</Link>
             </motion.div>
-          </>
-        )}
-
-        {isAuthenticated && (
-          <>
-            <motion.div variants={linkVariants} whileHover="hover">
-              <Link to={isProvider ? "/admin" : "/profile"} className="nav-link">
-                Profile
-              </Link>
-            </motion.div>
-            <motion.button
-              variants={linkVariants}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onLogout}
-              className="logout-button bg-red-500 text-white px-4 py-2 rounded-lg"
-            >
-              Logout
-            </motion.button>
           </>
         )}
       </motion.nav>

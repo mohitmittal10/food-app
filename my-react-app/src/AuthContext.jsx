@@ -1,3 +1,4 @@
+// AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { auth } from './components/signup/firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -12,35 +13,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              role: userDoc.data().role,
-              isAuthenticated: userDoc.data().isAuthenticated
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
+  const updateUserState = async (firebaseUser) => {
+    if (firebaseUser) {
+      try {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            role: userDoc.data().role,
+            isAuthenticated: true // Set this explicitly
+          });
         }
-      } else {
+      } catch (error) {
+        console.error("Error fetching user data:", error);
         setUser(null);
       }
-      setLoading(false);
-    });
+    } else {
+      setUser(null);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, updateUserState);
     return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     try {
+      setLoading(true); // Start loading state
       const currentUser = auth.currentUser;
       if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
@@ -54,13 +58,16 @@ export const AuthProvider = ({ children }) => {
       navigate('/login');
     } catch (error) {
       console.error("Error during logout:", error);
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
   const value = {
     user,
     handleLogout,
-    loading
+    loading,
+    updateUserState // Export this function
   };
 
   return (

@@ -336,7 +336,7 @@ const ProvidersList = ({ setTiffinCount }) => {
   const providers = [
     {
       id: 1,
-      name: "Maa's Kitchen",
+      name: "kitchen",
       cuisine: "North Indian | Pure Veg",
       location: "Jaipur",
       rating: 4.5,
