@@ -1,119 +1,84 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { db, auth } from './signup/firebaseConfig';
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy, 
+  serverTimestamp 
+} from 'firebase/firestore';
 
 const OrderContext = createContext();
-
-export const useOrders = () => {
-  const context = useContext(OrderContext);
-  if (!context) {
-    throw new Error('useOrders must be used within an OrderProvider');
-  }
-  return context;
-};
 
 export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
 
-  const addOrder = useCallback((newOrder) => {
-    if (!newOrder.id || !newOrder.name || !newOrder.quantity) {
-      throw new Error('Invalid order data: missing required fields');
-    }
-
-    setOrders((prevOrders) => {
-      const isDuplicate = prevOrders.some(order => order.id === newOrder.id);
-      if (isDuplicate) {
-        throw new Error('This order already exists');
+  const placeOrder = async (orderDetails) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User must be logged in to place an order");
       }
 
-      return [...prevOrders, {
-        ...newOrder,
-        orderId: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        orderDate: new Date().toISOString(),
+      const orderRef = await addDoc(collection(db, 'orders'), {
+        ...orderDetails,
+        userId: user.uid,
         status: 'pending',
-        isConfirmed: false
-      }];
-    });
-  }, []);
+        createdAt: serverTimestamp(),
+      });
 
-  const confirmOrder = useCallback((orderId) => {
-    setOrders((prevOrders) => {
-      const orderExists = prevOrders.some(order => order.orderId === orderId);
-      if (!orderExists) {
-        throw new Error('Order not found');
-      }
+      await fetchOrders();
 
-      return prevOrders.map((order) =>
-        order.orderId === orderId
-          ? { ...order, isConfirmed: true, status: 'confirmed', confirmationDate: new Date().toISOString() }
-          : order
-      );
-    });
-  }, []);
-
-  const cancelOrder = useCallback((orderId) => {
-    setOrders((prevOrders) => {
-      const orderExists = prevOrders.some(order => order.orderId === orderId);
-      if (!orderExists) {
-        throw new Error('Order not found');
-      }
-
-      return prevOrders.map((order) =>
-        order.orderId === orderId
-          ? { ...order, status: 'cancelled', cancellationDate: new Date().toISOString() }
-          : order
-      );
-    });
-  }, []);
-
-  const updateOrderQuantity = useCallback((orderId, newQuantity) => {
-    if (newQuantity < 1) {
-      throw new Error('Quantity must be at least 1');
+      return orderRef;
+    } catch (error) {
+      console.error("Error placing order:", error);
+      throw error;
     }
-
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.orderId === orderId
-          ? { ...order, quantity: newQuantity, lastUpdated: new Date().toISOString() }
-          : order
-      )
-    );
-  }, []);
-
-  const getOrderById = useCallback((orderId) => {
-    return orders.find(order => order.orderId === orderId);
-  }, [orders]);
-
-  const getOrdersByStatus = useCallback((status) => {
-    return orders.filter(order => order.status === status);
-  }, [orders]);
-
-  const getTotalOrders = useCallback(() => {
-    return orders.length;
-  }, [orders]);
-
-  const getTotalAmount = useCallback(() => {
-    return orders.reduce((total, order) => total + (order.price * order.quantity), 0);
-  }, [orders]);
-
-  const clearOrders = useCallback(() => {
-    setOrders([]);
-  }, []);
-
-  const value = {
-    orders,
-    addOrder,
-    confirmOrder,
-    cancelOrder,
-    updateOrderQuantity,
-    getOrderById,
-    getOrdersByStatus,
-    getTotalOrders,
-    getTotalAmount,
-    clearOrders
   };
 
+  const fetchOrders = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const q = query(
+        collection(db, 'orders'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const fetchedOrders = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setOrders(fetchedOrders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  const getTotalOrders = () => {
+    return orders.length;
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   return (
-    <OrderContext.Provider value={value}>
+    <OrderContext.Provider value={{ 
+      orders, 
+      placeOrder, 
+      fetchOrders,
+      getTotalOrders 
+    }}>
       {children}
     </OrderContext.Provider>
   );
 };
+
+export const useOrders = () => useContext(OrderContext);

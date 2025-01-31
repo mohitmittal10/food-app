@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useOrders } from "../OrderContext"; // Use your OrderContext to fetch orders
-import { useMenu } from "../MenuContext"; // Use your MenuContext to fetch and add menu items
 import { motion, AnimatePresence } from "framer-motion";
 import { auth, db } from "../signup/firebaseConfig";
-import { doc, getDoc, collection, addDoc, getDocs } from "firebase/firestore";
+import { 
+  doc, 
+  getDoc, 
+  collection, 
+  addDoc, 
+  getDocs, 
+  query, 
+  where 
+} from "firebase/firestore";
 import AdminHeader from "./AdminHeader";
 import "./admin.css";
 
 const AdminPage = () => {
-  const { orders } = useOrders(); // Fetch orders from OrderContext
-  const { addMenuItem, menuItems } = useMenu(); // Fetch menu items from MenuContext
   const [selectedSection, setSelectedSection] = useState("profile");
   const [providerProfile, setProviderProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [menuItemsState, setMenuItemsState] = useState([]);
+  const [providerOrders, setProviderOrders] = useState([]);
   const [newItem, setNewItem] = useState({
     name: "",
     description: "",
@@ -26,12 +31,14 @@ const AdminPage = () => {
     const fetchData = async () => {
       const user = auth.currentUser;
       if (user) {
+        // Fetch Provider Profile
         const docRef = doc(db, "providers", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setProviderProfile(docSnap.data());
         }
 
+        // Fetch Menu Items
         const menuRef = collection(db, "providers", user.uid, "menu");
         const menuSnap = await getDocs(menuRef);
         const items = menuSnap.docs.map((doc) => ({
@@ -39,6 +46,16 @@ const AdminPage = () => {
           ...doc.data(),
         }));
         setMenuItemsState(items);
+
+        // Fetch Provider Orders
+        const ordersRef = collection(db, "orders");
+        const q = query(ordersRef, where("providerId", "==", user.uid));
+        const ordersSnap = await getDocs(q);
+        const orders = ordersSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProviderOrders(orders);
       }
       setIsLoading(false);
     };
@@ -150,21 +167,143 @@ const AdminPage = () => {
 
   const renderOrders = () => (
     <motion.div variants={containerVariants}>
-      <motion.h2 variants={itemVariants}>Today's Orders</motion.h2>
-      <motion.hr variants={itemVariants} />
+      <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-4">
+        My Orders
+      </motion.h2>
       <motion.div className="orders" variants={containerVariants}>
-        {orders.map((order, index) => (
-          <motion.div
-            key={index}
-            className="order-card"
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
+        {providerOrders.length === 0 ? (
+          <p className="text-center text-gray-500">No orders found</p>
+        ) : (
+          providerOrders.map((order) => (
+            <motion.div
+              key={order.id}
+              className="order-card bg-white shadow-md rounded-lg p-4 mb-4"
+              variants={itemVariants}
+            >
+              <div className="order-header">
+                <h3 className="text-xl font-semibold">{order.item}</h3>
+                <span className="status-badge">{order.status || 'Pending'}</span>
+              </div>
+              <div className="order-details">
+                <div className="customer-info">
+                  <p><strong>Customer:</strong> {order.name}</p>
+                  <p><strong>Phone:</strong> {order.phone}</p>
+                  <p><strong>Address:</strong> {order.address}</p>
+                </div>
+                <div className="order-info">
+                  <p><strong>Quantity:</strong> {order.quantity}</p>
+                  <p><strong>Order Date:</strong> {new Date(order.createdAt?.toDate()).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </motion.div>
+    </motion.div>
+  );
+
+  const renderAddMenu = () => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      className="add-menu-container"
+    >
+      <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
+        Manage Menu Items
+      </motion.h2>
+      <motion.form
+        onSubmit={handleSubmit}
+        variants={itemVariants}
+        className="add-menu-form"
+      >
+        <div className="form-group">
+          <label htmlFor="name">Item Name*</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={newItem.name}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            value={newItem.description}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="price">Price (₹)*</label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={newItem.price}
+            onChange={handleChange}
+            required
+            min="0"
+            step="0.01"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="category">Category</label>
+          <select
+            id="category"
+            name="category"
+            value={newItem.category}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
           >
-            <p><strong>Name:</strong> {order.name}</p>
-            <p><strong>Mobile:</strong> {order.phone}</p>
-            <p><strong>Quantity:</strong> {order.quantity}</p>
-            <p><strong>Ordered Item:</strong> {order.item}</p>
-            <p><strong>Address:</strong> {order.address}</p>
+            <option value="">Select Category</option>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snacks">Snacks</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              name="isAvailable"
+              checked={newItem.isAvailable}
+              onChange={handleChange}
+            />
+            Available
+          </label>
+        </div>
+        <motion.button
+          type="submit"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="submit-button bg-blue-500 text-white p-2 rounded"
+        >
+          Add Menu Item
+        </motion.button>
+      </motion.form>
+
+      <motion.div variants={containerVariants} className="menu-items-list mt-8">
+        <h3 className="text-xl font-bold mb-4">Current Menu Items</h3>
+        {menuItemsState.map((item) => (
+          <motion.div
+            key={item.id}
+            variants={itemVariants}
+            className="menu-item-card bg-white shadow-md rounded-lg p-4 mb-4"
+          >
+            <h4 className="font-bold">{item.name}</h4>
+            <p>{item.description}</p>
+            <p className="text-green-600">₹{item.price}</p>
+            <p>Category: {item.category || "Uncategorized"}</p>
+            <p>{item.isAvailable ? "Available" : "Not Available"}</p>
           </motion.div>
         ))}
       </motion.div>
@@ -209,113 +348,7 @@ const AdminPage = () => {
           <AnimatePresence mode="wait">
             {selectedSection === "profile" && !isLoading && renderProfile()}
             {selectedSection === "orders" && renderOrders()}
-            {selectedSection === "addMenu" && (
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="add-menu-container"
-              >
-                <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">
-                  Manage Menu Items
-                </motion.h2>
-                <motion.form
-                  onSubmit={handleSubmit}
-                  variants={itemVariants}
-                  className="add-menu-form"
-                >
-                  <div className="form-group">
-                    <label htmlFor="name">Item Name*</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={newItem.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="description">Description</label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={newItem.description}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="price">Price (₹)*</label>
-                    <input
-                      type="number"
-                      id="price"
-                      name="price"
-                      value={newItem.price}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      step="0.01"
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="category">Category</label>
-                    <select
-                      id="category"
-                      name="category"
-                      value={newItem.category}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    >
-                      <option value="">Select Category</option>
-                      <option value="breakfast">Breakfast</option>
-                      <option value="lunch">Lunch</option>
-                      <option value="dinner">Dinner</option>
-                      <option value="snacks">Snacks</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="isAvailable"
-                        checked={newItem.isAvailable}
-                        onChange={handleChange}
-                      />
-                      Available
-                    </label>
-                  </div>
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="submit-button"
-                  >
-                    Add Menu Item
-                  </motion.button>
-                </motion.form>
-
-                <motion.div variants={containerVariants} className="menu-items-list">
-                  <h3 className="text-xl font-bold mt-8 mb-4">Current Menu Items</h3>
-                  {menuItemsState.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      variants={itemVariants}
-                      className="menu-item-card"
-                    >
-                      <h4 className="font-bold">{item.name}</h4>
-                      <p>{item.description}</p>
-                      <p className="text-green-600">₹{item.price}</p>
-                      <p>Category: {item.category || "Uncategorized"}</p>
-                      <p>{item.isAvailable ? "Available" : "Not Available"}</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </motion.div>
-            )}
+            {selectedSection === "addMenu" && renderAddMenu()}
           </AnimatePresence>
         </main>
       </div>

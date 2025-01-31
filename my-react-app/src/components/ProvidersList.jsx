@@ -1,522 +1,197 @@
-// import React, { useState, useEffect } from "react";
-// import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-// import "leaflet/dist/leaflet.css";
-// import L from "leaflet";
-// import "../styles/ProvidersList.css";
+// ProvidersList.jsx
+import React, { useState, useEffect } from 'react';
+import { useMenu } from './MenuContext';
+import { useOrders } from './OrderContext';
+import { auth, db } from './signup/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
-// // Custom marker icons for Leaflet
-// const userIcon = new L.Icon({
-//   iconUrl: "https://example.com/user-icon.png", // Replace with your custom user icon URL
-//   iconSize: [30, 30],
-// });
-
-// const providerIcon = new L.Icon({
-//   iconUrl: "https://example.com/provider-icon.png", // Replace with your custom provider icon URL
-//   iconSize: [30, 30],
-// });
-
-// const App = () => {
-//   const [userLocation, setUserLocation] = useState(null);
-//   const [filteredProviders, setFilteredProviders] = useState([]);
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(true);
-
-//   const providers = [
-//     {
-//       id: 1,
-//       name: "Maa's Kitchen",
-//       cuisine: "North Indian | Pure Veg",
-//       location: "Bhusawar",
-//       coordinates: { lat: 27.036, lng: 77.0522 },
-//       rating: 4.5,
-//       reviews: 120,
-//       menu: "2 Rotis, Dal Fry, Mix Veg, Rice, Salad",
-//       price: 80,
-//       minDays: 7,
-//     },
-//     {
-//       id: 2,
-//       name: "Gujarati Rasoi",
-//       cuisine: "Gujarati | Pure Veg",
-//       location: "Ahmedabad",
-//       coordinates: { lat: 23.0225, lng: 72.5714 },
-//       rating: 4.0,
-//       reviews: 85,
-//       menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
-//       price: 90,
-//       minDays: 5,
-//     },
-//   ];
-
-//   // Fetch user's live location
-//   useEffect(() => {
-//     if (navigator.geolocation) {
-//       navigator.geolocation.getCurrentPosition(
-//         (position) => {
-//           const { latitude, longitude } = position.coords;
-//           setUserLocation({ lat: latitude, lng: longitude });
-//           setLoading(false);
-//         },
-//         () => {
-//           setError("Unable to fetch location. Please allow location access.");
-//           setLoading(false);
-//         }
-//       );
-//     } else {
-//       setError("Geolocation is not supported by this browser.");
-//       setLoading(false);
-//     }
-//   }, []);
-
-//   // Filter providers based on proximity
-//   useEffect(() => {
-//     if (userLocation) {
-//       const filtered = providers.filter((provider) => {
-//         const distance = calculateDistance(
-//           userLocation.lat,
-//           userLocation.lng,
-//           provider.coordinates.lat,
-//           provider.coordinates.lng
-//         );
-//         return distance <= 10; // Show providers within 10 km
-//       });
-//       setFilteredProviders(filtered);
-//     }
-//   }, [userLocation]);
-
-//   const calculateDistance = (lat1, lng1, lat2, lng2) => {
-//     const toRad = (value) => (value * Math.PI) / 180;
-//     const R = 6371; // Radius of Earth in km
-//     const dLat = toRad(lat2 - lat1);
-//     const dLng = toRad(lng2 - lng1);
-//     const a =
-//       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-//       Math.cos(toRad(lat1)) *
-//         Math.cos(toRad(lat2)) *
-//         Math.sin(dLng / 2) *
-//         Math.sin(dLng / 2);
-//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//     return R * c;
-//   };
-
-//   if (loading) {
-//     return <p>Loading your location...</p>;
-//   }
-
-//   return (
-//     <main className="providers-list">
-//       <h2>Today's Available Providers</h2>
-
-//       {error && <p className="error">{error}</p>}
-
-//       {userLocation && (
-//         <div className="map-container">
-//           <MapContainer
-//             center={[userLocation.lat, userLocation.lng]}
-//             zoom={12}
-//             style={{ height: "400px", width: "100%" }}
-//           >
-//             <TileLayer
-//               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//               attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-//             />
-
-//             {/* User location marker */}
-//             <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
-//               <Popup>Your Location</Popup>
-//             </Marker>
-
-//             {/* Provider markers */}
-//             {filteredProviders.map((provider) => (
-//               <Marker
-//                 key={provider.id}
-//                 position={[provider.coordinates.lat, provider.coordinates.lng]}
-//                 icon={providerIcon}
-//               >
-//                 <Popup>
-//                   <strong>{provider.name}</strong>
-//                   <br />
-//                   {provider.cuisine}
-//                   <br />
-//                   {provider.location}
-//                   <br />
-//                   ⭐ {provider.rating} ({provider.reviews} reviews)
-//                 </Popup>
-//               </Marker>
-//             ))}
-//           </MapContainer>
-//         </div>
-//       )}
-
-//       {filteredProviders.length > 0 ? (
-//         filteredProviders.map((provider) => (
-//           <div key={provider.id} className="provider-card">
-//             <div className="provider-header">
-//               <h3>{provider.name}</h3>
-//               <p>{provider.cuisine}</p>
-//               <p>{provider.location}</p>
-//               <p>
-//                 <span className="rating">⭐ {provider.rating}</span> (
-//                 {provider.reviews} reviews)
-//               </p>
-//             </div>
-//             <div className="provider-body">
-//               <p>
-//                 <strong>Today's Menu:</strong> {provider.menu}
-//               </p>
-//               <div className="order-section">
-//                 <label htmlFor={`tiffin-quantity-${provider.id}`}>
-//                   Number of Tiffins:
-//                 </label>
-//                 <select id={`tiffin-quantity-${provider.id}`}>
-//                   {[1, 2, 3, 4, 5].map((num) => (
-//                     <option key={num} value={num}>
-//                       {num}
-//                     </option>
-//                   ))}
-//                 </select>
-//               </div>
-//             </div>
-//             <div className="provider-footer">
-//               <p>₹{provider.price}/meal</p>
-//               <p>Min order: {provider.minDays} days</p>
-//               <button className="order-btn">Order Now</button>
-//             </div>
-//           </div>
-//         ))
-//       ) : (
-//         <p>No tiffin providers available within 10 km of your location.</p>
-//       )}
-//     </main>
-//   );
-// };
-
-// export default App;
-
-
-
-
-
-
-// import React, { useState } from "react";
-// import "../styles/ProvidersList.css";
-
-// const App = () => {
-//   const [location, setLocation] = useState("");
-//   const [filteredProviders, setFilteredProviders] = useState([]);
-
-//   const providers = [
-//     {
-//       id: 1,
-//       name: "Maa's Kitchen",
-//       cuisine: "North Indian | Pure Veg",
-//       location: "Jaipur",
-//       rating: 4.5,
-//       reviews: 120,
-//       menu: "2 Rotis, Dal Fry, Mix Veg, Rice, Salad",
-//       price: 80,
-//       minDays: 7,
-//     },
-//     {
-//       id: 2,
-//       name: "Gujarati Rasoi",
-//       cuisine: "Gujarati | Pure Veg",
-//       location: "Ahmedabad",
-//       rating: 4.0,
-//       reviews: 85,
-//       menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
-//       price: 90,
-//       minDays: 5,
-//     },
-//     {
-//       id: 3,
-//       name: "Rajasthani Rasoi",
-//       cuisine: "Rajasthani | Pure Veg",
-//       location: "Jaipur",
-//       rating: 4.3,
-//       reviews: 100,
-//       menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
-//       price: 85,
-//       minDays: 6,
-//     },
-//   ];
-
-//   // Filter providers based on location input
-//   const handleSearch = () => {
-//     if (location.trim() === "") {
-//       setFilteredProviders(providers);
-//     } else {
-//       const filtered = providers.filter((provider) =>
-//         provider.location.toLowerCase().includes(location.toLowerCase())
-//       );
-//       setFilteredProviders(filtered);
-//     }
-//   };
-
-//   React.useEffect(() => {
-//     // Initially display all providers
-//     setFilteredProviders(providers);
-//   }, []);
-
-//   return (
-//     <div className="app">
-//       <header className="search-bar">
-//         <input
-//           type="text"
-//           placeholder="Enter your location"
-//           value={location}
-//           onChange={(e) => setLocation(e.target.value)}
-//         />
-//         <button onClick={handleSearch}>Search</button>
-//       </header>
-
-//       <main className="providers-list">
-//         <h2>Today's Available Providers</h2>
-
-//         {filteredProviders.length > 0 ? (
-//           filteredProviders.map((provider) => (
-//             <div key={provider.id} className="provider-card">
-//               <div className="provider-header">
-//                 <h3>{provider.name}</h3>
-//                 <p>{provider.cuisine}</p>
-//                 <p>{provider.location}</p>
-//                 <p>
-//                   <span className="rating">⭐ {provider.rating}</span> (
-//                   {provider.reviews} reviews)
-//                 </p>
-//               </div>
-//               <div className="provider-body">
-//                 <p>
-//                   <strong>Today's Menu:</strong> {provider.menu}
-//                 </p>
-//                 <div className="order-section">
-//                   <label htmlFor={`tiffin-quantity-${provider.id}`}>
-//                     Number of Tiffins:
-//                   </label>
-//                   <select id={`tiffin-quantity-${provider.id}`}>
-//                     {[1, 2, 3, 4, 5].map((num) => (
-//                       <option key={num} value={num}>
-//                         {num}
-//                       </option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               </div>
-//               <div className="provider-footer">
-//                 <p>₹{provider.price}/meal</p>
-//                 <p>Min order: {provider.minDays} days</p>
-//                 <button className="order-btn">Order Now</button>
-//               </div>
-//             </div>
-//           ))
-//         ) : (
-//           <p>No tiffin providers available for the entered location.</p>
-//         )}
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default App;
-import React, { useState, useEffect } from "react";
-import { useMenu } from "./MenuContext";
-import { useOrders } from "./OrderContext";
-import { useNavigate } from "react-router-dom";
-import "../styles/ProvidersList.css";
-
-const ProvidersList = ({ setTiffinCount }) => {
+const ProvidersList = () => {
   const { menuItems } = useMenu();
-  const { orders, addOrder } = useOrders();
-  const [location, setLocation] = useState("");
-  const [filteredProviders, setFilteredProviders] = useState([]);
-  const [selectedQuantities, setSelectedQuantities] = useState({});
-  const [notification, setNotification] = useState("");
+  const { placeOrder } = useOrders();
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [orderDetails, setOrderDetails] = useState({
+    quantity: 1
+  });
   const navigate = useNavigate();
 
-  const providers = [
-    {
-      id: 1,
-      name: "kitchen",
-      cuisine: "North Indian | Pure Veg",
-      location: "Jaipur",
-      rating: 4.5,
-      reviews: 120,
-      price: 80,
-      minDays: 7,
-    },
-    {
-      id: 2,
-      name: "Gujarati Rasoi",
-      cuisine: "Gujarati | Pure Veg",
-      location: "Ahmedabad",
-      rating: 4.0,
-      reviews: 85,
-      price: 90,
-      minDays: 5,
-    },
-    {
-      id: 3,
-      name: "Rajasthani Rasoi",
-      cuisine: "Rajasthani | Pure Veg",
-      location: "Kota",
-      rating: 4.0,
-      reviews: 85,
-      price: 90,
-      minDays: 5,
-    },
-  ];
-
-  const handleSearch = () => {
-    const filtered = location.trim()
-      ? providers.filter((provider) =>
-          provider.location.toLowerCase().includes(location.toLowerCase())
-        )
-      : providers;
-    setFilteredProviders(filtered);
-  };
-
   useEffect(() => {
-    handleSearch();
-  }, [location]);
+    const fetchUserProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-  const handleQuantityChange = (providerId, value) => {
-    setSelectedQuantities((prevState) => ({
-      ...prevState,
-      [providerId]: value,
-    }));
-  };
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data());
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setLoading(false);
+      }
+    };
 
-  const handleOrderNow = (provider) => {
+    fetchUserProfile();
+    
+    // Listen for auth state changes
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        setUserProfile(null);
+      } else {
+        fetchUserProfile();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleOrderSubmit = async (providerId, itemName) => {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      alert('Please login to place an order');
+      navigate('/login');
+      return;
+    }
+
+    if (!user.emailVerified) {
+      alert('Please verify your email before placing orders');
+      return;
+    }
+
+    if (!userProfile || !userProfile.contact || !userProfile.address) {
+      alert('Please complete your profile before placing an order');
+      return;
+    }
+
     try {
-      const quantity = selectedQuantities[provider.id];
-
-      if (!quantity || quantity < 1) {
-        alert("Please select a valid quantity.");
-        return;
-      }
-
-      const isAlreadyOrdered = orders.some((order) => order.id === provider.id);
-      if (isAlreadyOrdered) {
-        alert("You have already ordered from this provider.");
-        return;
-      }
-
-      const newOrder = { 
-        ...provider, 
-        quantity, 
-        isConfirmed: false,
-        orderDate: new Date().toISOString()
+      const orderData = {
+        item: itemName,
+        quantity: orderDetails.quantity,
+        name: userProfile.name,
+        phone: userProfile.contact, // Using contact from your user schema
+        address: userProfile.address,
+        providerId,
+        userId: user.uid,
+        status: 'pending',
+        createdAt: new Date(),
       };
-      
-      addOrder(newOrder);
 
-      if (setTiffinCount) {
-        setTiffinCount(orders.length + 1);
-      }
-
-      setNotification(`Order confirmed for ${provider.name} with ${quantity} tiffins!`);
-
-      setTimeout(() => {
-        setNotification("");
-        navigate("/orders");
-      }, 3000);
+      await placeOrder(orderData);
+      alert('Order placed successfully!');
+      setOrderDetails({ quantity: 1 });
     } catch (error) {
-      alert(`Error placing order: ${error.message}`);
+      console.error('Error placing order:', error);
+      alert('Failed to place order: ' + error.message);
     }
   };
 
-  return (
-    <div className="providers-page">
-      <header className="search-bar">
-        <input
-          type="text"
-          placeholder="Enter your location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <button onClick={handleSearch}>Search</button>
-      </header>
-
-      {notification && (
-        <div className="notification">
-          <p>{notification}</p>
-        </div>
-      )}
-
-      <main className="providers-list">
-        <h2>Today's Available Providers</h2>
-
-        {filteredProviders.length > 0 ? (
-          <div className="providers-container">
-            {filteredProviders.map((provider) => (
-              <div key={provider.id} className="provider-card">
-                <h3>{provider.name}</h3>
-                <p>{provider.cuisine}</p>
-                <p>{provider.location}</p>
-                <p>
-                  ⭐ {provider.rating} ({provider.reviews} reviews)
-                </p>
-                <p>₹{provider.price}/meal</p>
-                <p>Min order: {provider.minDays} days</p>
-
-                <h4>Today's Menu:</h4>
-                {menuItems
-                  .filter((item) => item.providerName === provider.name)
-                  .map((item, index) => (
-                    <div key={index}>
-                      <p>{item.description}</p>
-                    </div>
-                  ))}
-
-                <div className="quantity-selector">
-                  <button
-                    onClick={() => {
-                      if (selectedQuantities[provider.id] > 1) {
-                        handleQuantityChange(
-                          provider.id,
-                          selectedQuantities[provider.id] - 1
-                        );
-                      }
-                    }}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    value={selectedQuantities[provider.id] || 0}
-                    onChange={(e) =>
-                      handleQuantityChange(provider.id, parseInt(e.target.value, 10))
-                    }
-                    min="1"
-                    max="10"
-                  />
-                  <button
-                    onClick={() => {
-                      if (selectedQuantities[provider.id] < 10) {
-                        handleQuantityChange(
-                          provider.id,
-                          (selectedQuantities[provider.id] || 0) + 1
-                        );
-                      }
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
-
-                <button
-                  className="order-btn"
-                  onClick={() => handleOrderNow(provider)}
-                >
-                  Order Now
-                </button>
-              </div>
-            ))}
+  const renderOrderModal = (providerId, itemName) => (
+    <motion.div 
+      className="order-modal"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      {auth.currentUser ? (
+        userProfile ? (
+          <div className="p-4">
+            <div className="user-details-preview mb-4">
+              <p className="mb-2"><strong>Name:</strong> {userProfile.name}</p>
+              <p className="mb-2"><strong>Phone:</strong> {userProfile.contact}</p>
+              <p className="mb-2"><strong>Address:</strong> {userProfile.address}</p>
+            </div>
+            <div className="quantity-input mb-4">
+              <label className="block mb-2">Quantity:</label>
+              <input
+                type="number"
+                value={orderDetails.quantity}
+                onChange={(e) => setOrderDetails({ 
+                  quantity: Math.max(1, parseInt(e.target.value) || 1) 
+                })}
+                min="1"
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleOrderSubmit(providerId, itemName)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Confirm Order
+            </motion.button>
           </div>
         ) : (
-          <p>No tiffin providers available for the entered location.</p>
-        )}
-      </main>
+          <div className="p-4">
+            <p className="text-center text-red-500">
+              Please complete your profile before placing orders
+            </p>
+          </div>
+        )
+      ) : (
+        <div className="p-4">
+          <p className="text-center mb-4">Please login to place orders</p>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/login')}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            Login
+          </motion.button>
+        </div>
+      )}
+    </motion.div>
+  );
+
+  // Group menu items by kitchen
+  const menuByKitchen = menuItems.reduce((acc, item) => {
+    if (!acc[item.kitchenName]) {
+      acc[item.kitchenName] = [];
+    }
+    acc[item.kitchenName].push(item);
+    return acc;
+  }, {});
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="providers-list p-4">
+      {Object.entries(menuByKitchen).map(([kitchenName, items]) => (
+        <motion.div
+          key={kitchenName}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="kitchen-section mb-8"
+        >
+          <h2 className="text-2xl font-bold mb-4">{kitchenName}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((item) => (
+              <motion.div
+                key={item.id}
+                whileHover={{ scale: 1.02 }}
+                className="menu-item bg-white rounded-lg shadow-md p-4"
+              >
+                <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
+                <p className="text-green-600 font-bold mb-4">₹{item.price}</p>
+                {renderOrderModal(item.providerId, item.name)}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 };

@@ -18,7 +18,7 @@ import ProviderProfile from "./components/Provider/ProviderProfile";
 import ProviderLogin from "./components/Provider/ProviderLogin";
 import ProviderRegister from "./components/Provider/ProviderRegister";
 import Admin from "./components/Admin/admin";
-
+import { UserProvider } from "./components/userContext";
 // Styles
 import "./styles/App.css";
 
@@ -105,11 +105,13 @@ const AppContent = () => {
 const App = () => (
   <Router>
     <AuthProvider>
+      <UserProvider>
       <MenuProvider>
         <OrderProvider>
           <AppContent />
         </OrderProvider>
       </MenuProvider>
+      </UserProvider>
     </AuthProvider>
   </Router>
 );
