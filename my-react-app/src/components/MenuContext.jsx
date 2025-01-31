@@ -1,6 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { db, auth } from './signup/firebaseConfig';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { 
+  collection, 
+  getDocs, 
+  setDoc,
+  doc,
+  getDoc
+} from 'firebase/firestore';
 
 const MenuContext = createContext();
 
@@ -16,17 +22,17 @@ export const MenuProvider = ({ children }) => {
       
       for (const providerDoc of providersSnapshot.docs) {
         const provider = providerDoc.data();
-        const menuRef = collection(db, 'providers', providerDoc.id, 'menu');
-        const menuSnapshot = await getDocs(menuRef);
+        const menuDoc = await getDoc(doc(db, 'providers', providerDoc.id, 'currentMenu', 'menu'));
         
-        const providerMenuItems = menuSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          kitchenName: provider.kitchenName, // Add kitchen name to each menu item
-          providerId: providerDoc.id
-        }));
-        
-        allMenuItems.push(...providerMenuItems);
+        if (menuDoc.exists()) {
+          const menuData = menuDoc.data();
+          allMenuItems.push({
+            id: menuDoc.id,
+            ...menuData,
+            kitchenName: provider.kitchenName,
+            providerId: providerDoc.id
+          });
+        }
       }
       
       setMenuItems(allMenuItems);
@@ -35,27 +41,25 @@ export const MenuProvider = ({ children }) => {
     }
   };
 
-  const addMenuItem = async (newItem) => {
+  const updateMenuItem = async (menuItem) => {
     const user = auth.currentUser;
     if (!user) {
-      throw new Error("You must be logged in to add menu items");
+      throw new Error("You must be logged in to update menu items");
     }
 
     try {
-      const menuRef = collection(db, 'providers', user.uid, 'menu');
-      const docRef = await addDoc(menuRef, {
-        ...newItem,
-        price: parseFloat(newItem.price),
+      const menuRef = doc(db, 'providers', user.uid, 'currentMenu', 'menu');
+      await setDoc(menuRef, {
+        ...menuItem,
+        price: parseFloat(menuItem.price),
         providerId: user.uid,
-        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       // Refetch all menu items to update the context
       await fetchMenuItems();
-
-      return docRef;
     } catch (error) {
-      console.error("Error adding menu item:", error);
+      console.error("Error updating menu item:", error);
       throw error;
     }
   };
@@ -67,7 +71,7 @@ export const MenuProvider = ({ children }) => {
   return (
     <MenuContext.Provider value={{ 
       menuItems, 
-      addMenuItem, 
+      updateMenuItem, 
       fetchMenuItems 
     }}>
       {children}
@@ -75,6 +79,4 @@ export const MenuProvider = ({ children }) => {
   );
 };
 
-export const useMenu = () => {
-  return useContext(MenuContext);
-};
+export const useMenu = () => useContext(MenuContext);
