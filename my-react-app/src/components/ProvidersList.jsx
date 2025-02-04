@@ -6,6 +6,7 @@ import { auth, db } from './signup/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import "../styles/providersList.css";
 
 const ProvidersList = () => {
   const { menuItems } = useMenu();

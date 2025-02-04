@@ -1,129 +1,148 @@
-.app {
-  font-family: Arial, sans-serif;
-  margin: 5px;
-}
-
-.search-bar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.search-bar input {
-  padding: 10px;
-  width: 300px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.search-bar button {
-  padding: 10px 20px;
-  margin-left: 10px;
-  margin-top: 10px;
-  background-color: orange;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.search-bar button:hover {
-  background-color: darkorange;
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
 }
 
 .providers-list {
-  margin: 20px auto;
-  max-width: 1300px;
-}
-
-.providers-list h2 {
-  font-size: 1.5em;
-  margin-bottom: 20px;
-}
-
-.provider-card {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
   padding: 20px;
-  margin-bottom: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.provider-header h3 {
-  margin: 0;
-  font-size: 1.2em;
+.kitchen-section {
+  margin-bottom: 10px;
+}
+
+.kitchen-section h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.menu-item {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.menu-item:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.menu-item h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.menu-item p {
+  font-size: 1rem;
+  color: #FF5722;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.order-modal {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.order-modal .user-details-preview p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.quantity-input label {
+  font-weight: bold;
   color: #333;
 }
 
-.provider-header p {
-  margin: 5px 0;
+.quantity-input input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.quantity-input input:focus {
+  border-color: #FF5722;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #FF5722;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+button:hover {
+  background-color: #E64A19;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.flex.justify-center.items-center.min-h-screen p {
+  font-size: 1.5rem;
   color: #666;
 }
 
-.rating {
-  font-weight: bold;
-  color: #ff9800;
+.providers-list .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Cards in rows and side by side */
+  gap: 20px;
 }
 
-.provider-body {
-  margin-top: 15px;
+@media (max-width: 768px) {
+  .menu-item {
+    padding: 12px;
+  }
+
+  .kitchen-section h1 {
+    font-size: 1rem;
+  }
+
+  .menu-item h3 {
+    font-size: 1.1rem;
+  }
 }
 
-.provider-body strong {
-  color: #333;
-}
+@media (max-width: 480px) {
+  .providers-list {
+    padding: 10px;
+  }
 
-.order-section {
-  margin-top: 10px;
-}
+  .menu-item {
+    padding: 10px;
+  }
 
-.order-section select {
-  padding: 5px;
-  margin-left: 10px;
-}
+  .kitchen-section h1 {
+    font-size: 1.5rem;
+  }
 
-.provider-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  align-items: center;
-}
+  .menu-item h3 {
+    font-size: 1rem;
+  }
 
-.provider-footer p {
-  margin: 0;
-  color: #333;
+  .menu-item p {
+    font-size: 0.9rem;
+  }
 }
-
-.order-btn {
-  padding: 10px 15px;
-  background-color: green;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 87%;
-}
-
-.order-btn:hover {
-  background-color: darkgreen;
-}
-.notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #4CAF50;
-  color: white;
-  padding: 15px;
-  border-radius: 5px;
-  font-size: 16px;
-  z-index: 1000;
-  transition: opacity 0.5s ease;
-}
-
-.notification.hidden {
-  opacity: 0;
-}
-
-
