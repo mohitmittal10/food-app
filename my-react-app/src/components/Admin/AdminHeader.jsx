@@ -12,8 +12,8 @@ const AdminHeader = () => {
       </div>
       <nav className="nav-links">
         <Link to="/">Home</Link>
-        <Link to="/admin">Account</Link>
-        <Link to="/admin">LogOut</Link>
+        {/* <Link to="/admin">Account</Link>
+        <Link to="/admin">LogOut</Link> */}
       </nav>
     </header>
   );
