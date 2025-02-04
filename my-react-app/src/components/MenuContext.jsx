@@ -1,56 +1,82 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { db, auth } from './signup/firebaseConfig';
+import { 
+  collection, 
+  getDocs, 
+  setDoc,
+  doc,
+  getDoc
+} from 'firebase/firestore';
 
 const MenuContext = createContext();
 
-export const useMenu = () => {
-  const context = useContext(MenuContext);
-  if (!context) {
-    throw new Error('useMenu must be used within a MenuProvider');
-  }
-  return context;
-};
-
 export const MenuProvider = ({ children }) => {
-  const [menuItems, setMenuItems] = useState([
-    {
-      name: "North Indian Thali",
-      price: 80,
-      description: "",
-      providerName: "Maa's Kitchen",
-    },
-    {
-      name: "Rajasthani Thali",
-      price: 100,
-      description: "",
-      providerName: "Rajasthani Rasoi",
-    },
-    {
-      name: "Gujarati Thali",
-      price: 90,
-      description: "",
-      providerName: "Gujarati Rasoi",
-    },
-  ]);
+  const [menuItems, setMenuItems] = useState([]);
 
-  const addMenuItem = (newItem) => {
-    setMenuItems((prevItems) => [...prevItems, newItem]);
+  const fetchMenuItems = async () => {
+    try {
+      const providersRef = collection(db, 'providers');
+      const providersSnapshot = await getDocs(providersRef);
+      
+      const allMenuItems = [];
+      
+      for (const providerDoc of providersSnapshot.docs) {
+        const provider = providerDoc.data();
+        const menuDoc = await getDoc(doc(db, 'providers', providerDoc.id, 'currentMenu', 'menu'));
+        
+        if (menuDoc.exists()) {
+          const menuData = menuDoc.data();
+          allMenuItems.push({
+            id: menuDoc.id,
+            ...menuData,
+            kitchenName: provider.kitchenName,
+            providerId: providerDoc.id
+          });
+        }
+      }
+      
+      setMenuItems(allMenuItems);
+    } catch (error) {
+      console.error("Error fetching menu items:", error);
+    }
   };
 
-  const updateMenuItem = (providerName, updatedItem) => {
-    setMenuItems((prevItems) =>
-      prevItems.map((item) =>
-        item.providerName === providerName ? { ...item, ...updatedItem } : item
-      )
-    );
+  const updateMenuItem = async (menuItem) => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("You must be logged in to update menu items");
+    }
+
+    try {
+      const menuRef = doc(db, 'providers', user.uid, 'currentMenu', 'menu');
+      await setDoc(menuRef, {
+        ...menuItem,
+        price: parseFloat(menuItem.price),
+        providerId: user.uid,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Refetch all menu items to update the context
+      await fetchMenuItems();
+    } catch (error) {
+      console.error("Error updating menu item:", error);
+      throw error;
+    }
   };
+
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
 
   return (
     <MenuContext.Provider value={{ 
       menuItems, 
-      addMenuItem, 
-      updateMenuItem 
+      updateMenuItem, 
+      fetchMenuItems 
     }}>
       {children}
     </MenuContext.Provider>
   );
 };
+
+export const useMenu = () => useContext(MenuContext);
