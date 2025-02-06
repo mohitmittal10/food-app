@@ -13,7 +13,7 @@ import MyOrders from "./components/MyOrders";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Profile from "./components/Profile";
+import Profile from "./userProfile/Profile";
 import ProviderProfile from "./components/Provider/ProviderProfile";
 import ProviderLogin from "./components/Provider/ProviderLogin";
 import ProviderRegister from "./components/Provider/ProviderRegister";
