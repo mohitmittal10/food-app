@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 import { motion } from "framer-motion";
 import whyChooseUs from "./assets/whyChooseUs.webp";
-
+import fresh from "./assets/fresh&hygiene.webp";
+import Affordable from "./assets/Affordable.webp";
+import customizable from "./assets/customizable.webp";
+import variety from "./assets/variety.webp";
 
 const Home2 = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState("");
+  const scrollRef = useRef(null);
 
   // Static provider data (only 3 cards for Home Page)
   const providers = [
@@ -43,31 +47,44 @@ const Home2 = () => {
       menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
       price: 85,
       minDays: 6,
-    }
+    },
   ];
 
   const features = [
     {
       title: "Fresh and Hygienic",
       description: "Meals prepared with care and hygiene.",
-      image: whyChooseUs,
+      image: fresh,
     },
     {
       title: "Affordable Prices",
       description: "Delicious tiffins starting at just ₹80 per meal.",
-      image: whyChooseUs,
+      image: Affordable,
     },
     {
       title: "Customizable Orders",
       description: "Select the number of meals and duration as per your needs.",
-      image: whyChooseUs,
+      image: customizable,
     },
     {
       title: "Wide Variety",
       description: "North Indian, Gujarati, Rajasthani, and more cuisines available.",
-      image: whyChooseUs,
-    }
+      image: variety,
+    },
   ];
+
+  // Scroll Functions
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -480, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 480, behavior: "smooth" });
+    }
+  };
 
   return (
     <motion.div className="home-page">
@@ -84,20 +101,30 @@ const Home2 = () => {
         </header>
       </div>
 
-      {/* Providers List Section (Only 3 Cards) */}
+      {/* Providers List Section (Horizontally Scrollable) */}
       <main className="providers-list">
         <h2>Our Providers</h2>
-        <div className="providers-container">
-          {providers.map((provider) => (
-            <div key={provider.id} className="provider-card">
-              <h3>{provider.name}</h3>
-              <p>{provider.cuisine} | {provider.location}</p>
-              <p>⭐ {provider.rating} ({provider.reviews} reviews)</p>
-              <p><strong>Today's Menu:</strong> {provider.menu}</p>
-              <p>₹{provider.price}/meal | Min order: {provider.minDays} days</p>
-              <button className="order-btn">Order Now</button>
+        <div className="scroll-container">
+          <button className="scroll-btn left" onClick={scrollLeft}>&#9665;</button>
+          <div className="providers-container" ref={scrollRef}>
+            {providers.map((provider) => (
+              <div key={provider.id} className="provider-card">
+                <h3>{provider.name}</h3>
+                <p>{provider.cuisine} | {provider.location}</p>
+                <p>⭐ {provider.rating} ({provider.reviews} reviews)</p>
+                <p><strong>Today's Menu:</strong> {provider.menu}</p>
+                <p>₹{provider.price}/meal | Min order: {provider.minDays} days</p>
+                <button className="order-btn">Order Now</button>
+              </div>
+            ))}
+            {/* CTA Card */}
+            <div className="provider-card cta-card">
+              <button className="explore-btn" onClick={() => navigate("/providers")}>
+                View More Providers
+              </button>
             </div>
-          ))}
+          </div>
+          <button className="scroll-btn right" onClick={scrollRight}>&#9655;</button>
         </div>
       </main>
 
@@ -105,28 +132,16 @@ const Home2 = () => {
       <motion.main className="home-features">
         <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us?</h2>
         <div className="features-container">
-        {features.map((feature, index) => (
-    <motion.div key={index} className="feature-card" style={{ backgroundImage: `url(${feature.image})` }}>
-        <div className="feature-text">
-            <h3>{feature.title}</h3>
-            <p>{feature.description}</p>
-        </div>
-    </motion.div>
-))}
-
+          {features.map((feature, index) => (
+            <motion.div key={index} className="feature-card" style={{ backgroundImage: `url(${feature.image})` }}>
+              <div className="feature-text">
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </motion.main>
-
-      {/* Footer Section with CTA Button */}
-      <motion.footer className="home-footer">
-      <motion.button
-          onClick={() => navigate("/providers")}
-          className="explore-btn"
-        >
-          View More Providers
-        </motion.button>
-        <p>Join thousands of satisfied customers today!</p>       
-      </motion.footer>
     </motion.div>
   );
 };
