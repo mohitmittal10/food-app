@@ -8,18 +8,19 @@ import Affordable from "./assets/Affordable.webp";
 import customizable from "./assets/customizable.webp";
 import variety from "./assets/variety.webp";
 
-const Home2 = () => {
+const Home = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState("");
+  const [filteredProviders, setFilteredProviders] = useState(null);
   const scrollRef = useRef(null);
 
-  // Static provider data (only 3 cards for Home Page)
+  // Static provider data
   const providers = [
     {
       id: 1,
       name: "Maa's Kitchen",
       cuisine: "North Indian | Pure Veg",
-      location: "Jaipur",
+      location: "Sodala",
       rating: 4.5,
       reviews: 120,
       menu: "2 Rotis, Dal Fry, Mix Veg, Rice, Salad",
@@ -30,7 +31,7 @@ const Home2 = () => {
       id: 2,
       name: "Gujarati Rasoi",
       cuisine: "Gujarati | Pure Veg",
-      location: "Ahmedabad",
+      location: "Pratap Nagar",
       rating: 4.0,
       reviews: 85,
       menu: "3 Rotis, Kathol, Bhindi, Rice, Buttermilk, Sweet",
@@ -41,7 +42,18 @@ const Home2 = () => {
       id: 3,
       name: "Rajasthani Rasoi",
       cuisine: "Rajasthani | Pure Veg",
-      location: "Kota",
+      location: "Malviya Nagar",
+      rating: 4.3,
+      reviews: 100,
+      menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
+      price: 85,
+      minDays: 6,
+    },
+    {
+      id: 4,
+      name: "Mumbai Meals",
+      cuisine: "Rajasthani | Pure Veg",
+      location: "Sodala",
       rating: 4.3,
       reviews: 100,
       menu: "3 Rotis, Dal Bati, Churma, Rice, Salad",
@@ -86,6 +98,18 @@ const Home2 = () => {
     }
   };
 
+  // Search Functionality
+  const handleSearch = () => {
+    if (location.trim() === "") {
+      setFilteredProviders(null); // Reset to original providers if input is empty
+    } else {
+      const results = providers.filter(provider =>
+        provider.location.toLowerCase().includes(location.toLowerCase())
+      );
+      setFilteredProviders(results);
+    }
+  };
+
   return (
     <motion.div className="home-page">
       {/* Background Section (Search Section) */}
@@ -97,35 +121,53 @@ const Home2 = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
-          <button>Search</button>
+          <button onClick={handleSearch}>Search</button>
         </header>
       </div>
 
-      {/* Providers List Section (Horizontally Scrollable) */}
+      {/* Providers List Section */}
       <main className="providers-list">
         <h2>Our Providers</h2>
-        <div className="scroll-container">
-          <button className="scroll-btn left" onClick={scrollLeft}>&#9665;</button>
-          <div className="providers-container" ref={scrollRef}>
-            {providers.map((provider) => (
-              <div key={provider.id} className="provider-card">
-                <h3>{provider.name}</h3>
-                <p>{provider.cuisine} | {provider.location}</p>
-                <p>⭐ {provider.rating} ({provider.reviews} reviews)</p>
-                <p><strong>Today's Menu:</strong> {provider.menu}</p>
-                <p>₹{provider.price}/meal | Min order: {provider.minDays} days</p>
-                <button className="order-btn">Order Now</button>
-              </div>
-            ))}
-            {/* CTA Card */}
-            <div className="provider-card cta-card">
-              <button className="explore-btn" onClick={() => navigate("/providers")}>
-                View More Providers
-              </button>
-            </div>
+        {filteredProviders ? (
+          <div className="filtered-providers-container">
+            {filteredProviders.length > 0 ? (
+              filteredProviders.map((provider) => (
+                <div key={provider.id} className="provider-card">
+                  <h3>{provider.name}</h3>
+                  <p>{provider.cuisine} | {provider.location}</p>
+                  <p>⭐ {provider.rating} ({provider.reviews} reviews)</p>
+                  <p><strong>Today's Menu:</strong> {provider.menu}</p>
+                  <p>₹{provider.price}/meal | Min order: {provider.minDays} days</p>
+                  <button className="order-btn">Order Now</button>
+                </div>
+              ))
+            ) : (
+              <p>No providers found for this location.</p>
+            )}
           </div>
-          <button className="scroll-btn right" onClick={scrollRight}>&#9655;</button>
-        </div>
+        ) : (
+          <div className="scroll-container">
+            <button className="scroll-btn left" onClick={scrollLeft}>&#9665;</button>
+            <div className="providers-container" ref={scrollRef}>
+              {providers.map((provider) => (
+                <div key={provider.id} className="provider-card">
+                  <h3>{provider.name}</h3>
+                  <p>{provider.cuisine} | {provider.location}</p>
+                  <p>⭐ {provider.rating} ({provider.reviews} reviews)</p>
+                  <p><strong>Today's Menu:</strong> {provider.menu}</p>
+                  <p>₹{provider.price}/meal | Min order: {provider.minDays} days</p>
+                  <button className="order-btn">Order Now</button>
+                </div>
+              ))}
+              <div className="provider-card cta-card">
+                <button className="explore-btn" onClick={() => navigate("/providers")}>
+                  View More Providers
+                </button>
+              </div>
+            </div>
+            <button className="scroll-btn right" onClick={scrollRight}>&#9655;</button>
+          </div>
+        )}
       </main>
 
       {/* Why Choose Us Section */}
@@ -146,4 +188,4 @@ const Home2 = () => {
   );
 };
 
-export default Home2;
+export default Home;
