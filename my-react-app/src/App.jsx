@@ -19,6 +19,7 @@ import ProviderLogin from "./components/Provider/ProviderLogin";
 import ProviderRegister from "./components/Provider/ProviderRegister";
 import Admin from "./components/Admin/admin";
 import { UserProvider } from "./components/userContext";
+import AddRestaurant from "./components/AddRestaurant"; 
 // Styles
 import "./styles/App.css";
 
@@ -53,6 +54,7 @@ const AppContent = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/provider/login" element={<ProviderLogin />} />
           <Route path="/provider/register" element={<ProviderRegister />} />
+          <Route path="/add-restaurant" element={<AddRestaurant />} />
 
           {/* Protected Routes */}
           <Route
