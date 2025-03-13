@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 import { motion } from "framer-motion";
-import whyChooseUs from "./assets/whyChooseUs.webp";
+import whyChooseUs from "./assets/WhyChooseUs.webp";
 import fresh from "./assets/fresh&hygiene.webp";
 import Affordable from "./assets/Affordable.webp";
 import customizable from "./assets/customizable.webp";
