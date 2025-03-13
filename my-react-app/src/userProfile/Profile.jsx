@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import ProfileSection from './ProfileSection';
 import OrdersSection from './OrdersSection';
 import SupportSection from './SupportSection';
-import "./userProfile.css"
+import "./userprofile.css"
 
 const UserProfile = () => {
   const [activeSection, setActiveSection] = useState('profile');
